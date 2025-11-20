@@ -1,0 +1,73 @@
+/**
+ * Tailwind CSS Directives
+ *
+ * `@tailwind base;` - Injects Tailwind's base styles and any base styles registered by plugins.
+ * `@tailwind components;` - Injects Tailwind's component classes and any component classes registered by plugins.
+ * `@tailwind utilities;` - Injects Tailwind's utility classes and any utility classes registered by plugins.
+ *
+ * These are the fundamental building blocks for Tailwind CSS to work in the project.
+ */
+@import "tailwindcss";
+
+@theme {
+  --color-primary-orange: #f37c34;
+}
+
+/* Prevent page-level scrollbar */
+body {
+  overflow-y: hidden;
+}
+
+/* Global Scrollbar Styles */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #4b5563 #111827;
+  /* thumb and track colors for Firefox */
+}
+
+/* Webkit browsers (Chrome, Safari, Edge) */
+*::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+*::-webkit-scrollbar-track {
+  background: #111827;
+  /* bg-gray-900 */
+  border-radius: 4px;
+}
+
+*::-webkit-scrollbar-thumb {
+  background: #4b5563;
+  /* bg-gray-600 */
+  border-radius: 4px;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background: #6b7280;
+  /* bg-gray-500 */
+}
+
+/* Shake animation for highlighted vote cards */
+@keyframes gentle-shake {
+
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+
+  10%,
+  30%,
+  50%,
+  70%,
+  90% {
+    transform: translateX(-1px);
+  }
+
+  20%,
+  40%,
+  60%,
+  80% {
+    transform: translateX(1px);
+  }
+}
