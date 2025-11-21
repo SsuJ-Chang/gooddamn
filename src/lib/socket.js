@@ -1,27 +1,27 @@
 import { io } from 'socket.io-client';
 
 /**
- * Socket.IO Client Initialization
+ * Socket.IO 使用端初始化
  *
- * This module handles the setup and export of the Socket.IO client instance.
- * By centralizing it here, we ensure that the entire application uses a single, consistent
- * connection to the backend server.
+ * 此模組處理 Socket.IO 使用端實例的設定和匯出。
+ * 透過集中管理，我們確保整個應用程式使用單一、一致的
+ * 後端伺服器連線。
  */
 
-// URL of the backend server.
-// In a real-world production app, this would likely come from an environment variable.
-// For example: `const URL = process.env.NODE_ENV === 'production' ? 'https://your-production-url.com' : 'http://localhost:3000';`
+// 後端伺服器的 URL。
+// 在實際的正式環境應用程式中，這通常會來自環境變數。
+// 例如: `const URL = process.env.NODE_ENV === 'production' ? 'https://your-production-url.com' : 'http://localhost:3001';`
 const URL = 'http://localhost:3001';
 
 /**
- * The `socket` instance.
+ * `socket` 實例。
  *
- * We initialize the connection here.
- * `io(URL)`: Creates the connection to the server at the specified URL.
- * `{ autoConnect: false }`: This is an important optimization. We are telling the socket
- * instance not to automatically connect on creation. We will manually call `socket.connect()`
- * in our state management store (`useStore.js`) when the user is actually ready to go online.
- * This prevents unnecessary connections when a user just opens the app.
+ * 我們在這裡初始化連線。
+ * `io(URL)`: 建立到指定 URL 伺服器的連線。
+ * `{ autoConnect: false }`: 這是一個重要的優化。我們告訴 socket
+ * 實例在建立時不要自動連線。我們將在狀態管理 store (`useStore.js`) 中
+ * 手動呼叫 `socket.connect()`，當使用者實際準備好上線時。
+ * 這可以防止使用者只是打開應用程式時產生不必要的連線。
  */
 export const socket = io(URL, {
   autoConnect: false,

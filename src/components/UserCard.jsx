@@ -1,62 +1,62 @@
 import { FiCheck, FiHelpCircle } from 'react-icons/fi';
 
 /**
- * UserCard Component
+ * 使用者卡片元件
  *
- * This component displays a single user's card in the room. It shows their name
- * and their voting status (not voted, voted, or their vote value).
+ * 此元件顯示房間中單個使用者的卡片。它顯示他們的名字
+ * 和投票狀態（未投票、已投票或投票值）。
  *
- * @param {object} props - The properties passed to the component.
- * @param {object} props.user - The user object, contains name and vote.
- * @param {boolean} props.isCurrentUser - True if this card represents the person viewing the app.
- * @param {boolean} props.votesVisible - True if the votes have been revealed by the room owner.
- * @param {boolean} props.isHighlighted - True if this card has the most voted value.
+ * @param {object} props - 傳遞給元件的屬性
+ * @param {object} props.user - 使用者物件，包含名字和投票
+ * @param {boolean} props.isCurrentUser - 如果此卡片代表正在查看應用程式的人，則為 true
+ * @param {boolean} props.votesVisible - 如果投票已被房主揭示，則為 true
+ * @param {boolean} props.isHighlighted - 如果此卡片擁有最多票的值，則為 true
  */
 export function UserCard({ user, isCurrentUser, votesVisible, isHighlighted = false }) {
-  // A derived boolean to easily check if the user has submitted a vote.
+  // 衍生布林值，用於輕鬆檢查使用者是否已提交投票
   const hasVoted = user.vote !== null;
 
   return (
-    // The main container for the card.
-    // `relative` is crucial for positioning the user's name absolutely inside it.
-    // `h-40` sets a fixed height. `rounded-lg` gives it nice rounded corners.
-    // `bg-primary-orange` sets the background color from our theme.
-    // `overflow-hidden` is a good practice to ensure nothing spills out of the rounded corners.
+    // 卡片的主要容器
+    // `relative` 對於在其內部絕對定位使用者名稱至關重要
+    // `h-40` 設定固定高度。`rounded-lg` 給它漂亮的圓角
+    // `bg-primary-orange` 從我們的主題設定背景顏色
+    // `overflow-hidden` 是一個好習慣，確保沒有東西溢出圓角
     <div className={`relative h-40 rounded-lg text-white shadow-lg overflow-hidden border-2 ${isHighlighted
-        ? 'bg-gradient-to-br from-yellow-400 to-amber-500 border-yellow-300 ring-4 ring-yellow-400 animate-[gentle-shake_0.5s_ease-in-out_infinite]'
-        : 'bg-primary-orange border-white'
+      ? 'bg-gradient-to-br from-yellow-400 to-amber-500 border-yellow-300 ring-4 ring-yellow-400 animate-[gentle-shake_0.5s_ease-in-out_infinite]'
+      : 'bg-primary-orange border-white'
       }`}>
       {/*
-       * Vote Display Container
-       * Positioned at 1/3 of the card height (instead of center)
-       * text-7xl is ~1.5x larger than text-5xl (72px vs 48px)
+       * 投票顯示容器
+       * 定位在卡片高度的 2/5 處（而不是中心）
+       * text-7xl 比 text-5xl 大約 1.5 倍（72px vs 48px）
       */}
       <div className="flex h-full w-full items-start justify-center pt-7">
         {!votesVisible ? (
-          // --- Content to show BEFORE votes are revealed ---
+          // --- 在投票顯示之前要展示的內容 ---
           hasVoted ? (
-            // If the user has voted, show a green checkmark.
+            // 如果使用者已投票，顯示綠色勾選記號
             <FiCheck className="text-7xl text-green-300 drop-shadow-lg" />
           ) : (
-            // If the user has not voted, show a gray question mark.
+            // 如果使用者尚未投票，顯示灰色問號
             <FiHelpCircle className="text-7xl text-gray-200 drop-shadow-lg" />
           )
         ) : (
-          // --- Content to show AFTER votes are revealed ---
-          // Display the user's vote value.
+          // --- 在投票顯示之後要展示的內容 ---
+          // 顯示使用者的投票值
           <span className="text-7xl font-bold" style={{ textShadow: '4px 4px 4px rgba(0,0,0,0.5)' }}>{user.vote || '-'}</span>
         )}
       </div>
 
       {/*
-       * User Name Display
-       * This div is positioned at the bottom of the card.
-       * `absolute`: Takes the element out of the normal layout flow.
-       * `bottom-2`: Positions it 0.5rem (8px) from the bottom of the `relative` parent.
-       * `left-1/2 -translate-x-1/2`: This is the standard trick for perfect horizontal centering.
-       *   It moves the element's left edge to the center, then shifts it left by half of its own width.
-       * `w-full text-center`: Ensures the text inside is centered if it wraps.
-       * `isCurrentUser ? 'font-bold' : ''`: We make the current user's name bold to help them find their own card.
+       * 使用者名稱顯示
+       * 此 div 定位在卡片底部
+       * `absolute`: 將元素從正常佈局流程中取出
+       * `bottom-5`: 將其定位在 `relative` 父元素底部向上約 1.25rem 處（4/5 卡片高度）
+       * `left-1/2 -translate-x-1/2`: 這是完美水平置中的標準技巧
+       *   它將元素的左邊緣移動到中心，然後將其向左移動自身寬度的一半
+       * `w-full text-center`: 確保內部文字居中（如果換行）
+       * `isCurrentUser ? 'underline' : ''`: 我們為當前使用者的名字加底線，幫助他們找到自己的卡片
       */}
       <div
         className={`absolute bottom-5 left-1/2 w-full -translate-x-1/2 px-2 text-center text-xl font-bold truncate ${isCurrentUser ? 'underline' : ''

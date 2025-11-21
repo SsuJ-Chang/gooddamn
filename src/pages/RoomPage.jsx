@@ -5,15 +5,15 @@ import { VotingPanel } from '../components/VotingPanel';
 import { RoomControls } from '../components/RoomControls';
 
 /**
- * RoomPage Component
+ * 房間頁面元件
  *
- * This is the main page where the planning poker session happens.
- * It's a "container" component that fetches all the necessary data from the store
- * and then passes that data down to smaller, "presentational" child components.
- * This pattern is great for keeping your code organized.
+ * 這是 Planning Poker 會議進行的主要頁面。
+ * 它是一個「容器」元件，從 store 中獲取所有必要的資料，
+ * 然後將資料傳遞給較小的「展示型」子元件。
+ * 這種模式有助於保持程式碼組織良好。
  */
 export function RoomPage() {
-  // Select all the state and actions needed for this page and its children from the store.
+  // 從 store 選擇此頁面及其子元件所需的所有狀態和 actions
   const room = useStore((state) => state.room);
   const clientId = useStore((state) => state.clientId);
   const leaveRoom = useStore((state) => state.leaveRoom);
@@ -21,7 +21,7 @@ export function RoomPage() {
   const showVotes = useStore((state) => state.showVotes);
   const resetVotes = useStore((state) => state.resetVotes);
 
-  // It's good practice to handle loading/empty states gracefully.
+  // 優雅地處理載入/空狀態是一個好習慣
   if (!room || !room.users) {
     return (
       <div className="flex h-screen items-center justify-center text-xl">
@@ -30,47 +30,47 @@ export function RoomPage() {
     );
   }
 
-  // Derived state: calculate values needed by the components from the base state.
+  // 衍生狀態：從基礎狀態計算元件所需的值
   const users = Object.values(room.users);
   const currentUser = users.find((u) => u.id === clientId);
   const isOwner = room.owner === clientId;
 
-  // Calculate which vote value should be highlighted (most common vote)
-  // Only highlight if there's a clear winner (no tie)
+  // 計算哪個投票值應該被凸顯（最多票的選項）
+  // 只有在有明確獲勝者時才凸顯（沒有平手）
   const calculateMostVotedValue = () => {
     if (!room.votesVisible) return null;
 
-    // Count occurrences of each vote value
+    // 統計每個投票值的出現次數
     const voteCounts = {};
     users.forEach((user) => {
-      if (user.vote && user.vote !== '?') { // Exclude '?' votes from counting
+      if (user.vote && user.vote !== '?') { // 排除 '?' 投票不計入統計
         voteCounts[user.vote] = (voteCounts[user.vote] || 0) + 1;
       }
     });
 
-    // If no votes or only one person voted, don't highlight
+    // 如果沒有投票或只有一個人投票，則不凸顯
     const voteValues = Object.keys(voteCounts);
     if (voteValues.length === 0 || users.filter(u => u.vote && u.vote !== '?').length === 1) {
       return null;
     }
 
-    // Find the maximum vote count
+    // 找出最大票數
     const maxCount = Math.max(...Object.values(voteCounts));
 
-    // Find all values with the maximum count
+    // 找出所有具有最大票數的值
     const mostVotedValues = voteValues.filter(v => voteCounts[v] === maxCount);
 
-    // Only highlight if there's exactly one winner (no tie)
+    // 只有在有唯一獲勝者時才凸顯（沒有平手）
     return mostVotedValues.length === 1 ? mostVotedValues[0] : null;
   };
 
   const highlightValue = calculateMostVotedValue();
 
   return (
-    // The main layout with vertical centering
+    // 主要佈局，垂直置中
     <div className="flex h-screen items-center justify-center bg-gray-900 p-4 overflow-hidden">
       <div className="flex w-full max-w-7xl flex-col gap-6">
-        {/* 1. Header Component */}
+        {/* 1. Header 元件 */}
         <Header
           roomName={room.name}
           roomId={room.id}
@@ -78,7 +78,7 @@ export function RoomPage() {
           onLeave={leaveRoom}
         />
 
-        {/* 2. Main content area for the user cards */}
+        {/* 2. 使用者卡片的主要內容區域 */}
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
           {users.map((user) => (
             <UserCard
@@ -91,16 +91,16 @@ export function RoomPage() {
           ))}
         </div>
 
-        {/* 3. Footer area for voting and controls */}
+        {/* 3. 投票和控制的底部區域 */}
         <div className="flex flex-col items-center gap-6">
-          {/* The VotingPanel is only shown if the user is not the owner or if votes are not visible */}
+          {/* VotingPanel 投票面板 */}
           <VotingPanel
             currentUserVote={currentUser?.vote}
             onVote={vote}
             disabled={room.votesVisible}
           />
 
-          {/* The RoomControls are only shown if the current user is the room owner */}
+          {/* RoomControls 只在當前使用者是房主時顯示 */}
           {isOwner && (
             <RoomControls
               onShowVotes={showVotes}

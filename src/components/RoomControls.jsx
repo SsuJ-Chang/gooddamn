@@ -1,15 +1,15 @@
 import { FiEye, FiRefreshCw } from 'react-icons/fi';
 
 /**
- * RoomControls Component
+ * 房間控制元件
  *
- * Displays the administrative controls for the room owner, specifically
- * the "Reveal Votes" and "New Round" buttons.
+ * 顯示房主的管理控制項，特別是
+ * 「顯示投票」和「新回合」按鈕。
  *
- * @param {object} props - The properties passed to the component.
- * @param {function} props.onShowVotes - Function to call to reveal the votes.
- * @param {function} props.onResetVotes - Function to call to start a new voting round.
- * @param {boolean} props.votesVisible - Whether votes are currently visible, to disable the reveal button.
+ * @param {object} props - 傳遞給元件的屬性
+ * @param {function} props.onShowVotes - 呼叫以揭示投票的函數
+ * @param {function} props.onResetVotes - 呼叫以開始新投票回合的函數
+ * @param {boolean} props.votesVisible - 投票目前是否可見，用於停用揭示按鈕
  */
 export function RoomControls({ onShowVotes, onResetVotes, votesVisible }) {
   return (

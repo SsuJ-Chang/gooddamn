@@ -1,23 +1,23 @@
 import { FiUsers, FiLogOut } from 'react-icons/fi';
 
 /**
- * Header Component
+ * Header 頁首元件
  *
- * This component displays the top-level information about the room, such as the
- * room name, ID, and number of participants. It also provides the "Leave" button.
- * It's a "presentational" component; it just displays data passed to it via props.
+ * 此元件顯示房間的頂層資訊，例如房間名稱、ID 和參與者數量。
+ * 它還提供「離開」按鈕。
+ * 這是一個「展示型」元件；它只是顯示透過 props 傳遞給它的資料。
  *
- * @param {object} props - The properties passed to the component.
- * @param {string} props.roomName - The name of the room (not currently used by backend, but good for UI).
- * @param {string} props.roomId - The unique ID of the room.
- * @param {number} props.userCount - The number of users currently in the room.
- * @param {function} props.onLeave - The function to call when the "Leave" button is clicked.
+ * @param {object} props - 傳遞給元件的屬性
+ * @param {string} props.roomName - 房間的名稱
+ * @param {string} props.roomId - 房間的唯一 ID
+ * @param {number} props.userCount - 目前在房間中的使用者數量
+ * @param {function} props.onLeave - 點擊「離開」按鈕時要呼叫的函數
  */
 export function Header({ roomName, userCount, onLeave }) {
 
   return (
     <header className="flex flex-wrap items-center justify-between gap-4 rounded-lg bg-gray-800 p-4 shadow-md">
-      {/* Left Section: Room Name and ID */}
+      {/* 左側區塊：房間名稱 */}
       <div className="flex flex-col">
         <h1 className="text-2xl font-bold text-white">
           {roomName || 'Planning Poker'}
@@ -25,7 +25,7 @@ export function Header({ roomName, userCount, onLeave }) {
 
       </div>
 
-      {/* Right Section: User Count and Leave Button */}
+      {/* 右側區塊：使用者數量和離開按鈕 */}
       <div className="flex items-center gap-6">
         <div className="flex items-center gap-2 text-lg">
           <FiUsers className="text-gray-400" />
