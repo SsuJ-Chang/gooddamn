@@ -9,9 +9,9 @@ import { io } from 'socket.io-client';
  */
 
 // 後端伺服器的 URL。
-// 在實際的正式環境應用程式中，這通常會來自環境變數。
-// 例如: `const URL = process.env.NODE_ENV === 'production' ? 'https://your-production-url.com' : 'http://localhost:3001';`
-const URL = 'http://localhost:3001';
+// 在生產環境中，VITE_SOCKET_URL 應該指向您的 EC2 公共 IP 或域名
+// 開發環境會使用 localhost:3001
+const URL = import.meta.env.VITE_SOCKET_URL || 'http://localhost:3001';
 
 /**
  * `socket` 實例。
