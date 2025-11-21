@@ -8,10 +8,11 @@ import { io } from 'socket.io-client';
  * 後端伺服器連線。
  */
 
-// 後端伺服器的 URL。
-// 在生產環境中，VITE_SOCKET_URL 應該指向您的 EC2 公共 IP 或域名
-// 開發環境會使用 localhost:3001
-const URL = import.meta.env.VITE_SOCKET_URL || 'http://localhost:3001';
+// 後端伺服器的 URL
+// Docker 環境: 使用空字符串（相對路徑），通過 Nginx 代理訪問
+// 開發環境: http://localhost:3001
+// 生產環境: 您的 EC2 IP 或域名
+const URL = import.meta.env.VITE_SOCKET_URL || '';
 
 /**
  * `socket` 實例。
