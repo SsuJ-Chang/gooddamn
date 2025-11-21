@@ -13,19 +13,22 @@ import { FiEye, FiRefreshCw } from 'react-icons/fi';
  */
 export function RoomControls({ onShowVotes, onResetVotes, votesVisible }) {
   return (
-    <div className="flex items-center justify-center gap-4 rounded-lg bg-gray-800 p-4 shadow-md">
+    // 響應式控制面板：手機版減少 padding 和間距
+    <div className="flex items-center justify-center gap-2 sm:gap-4 rounded-lg bg-gray-800 p-2 sm:p-4 shadow-md">
+      {/* Reveal 按鈕 - 響應式 padding */}
       <button
         onClick={onShowVotes}
         disabled={votesVisible}
-        className="flex items-center gap-2 rounded-md bg-indigo-600 px-6 py-3 font-bold text-white shadow-lg transition-transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:ring-offset-gray-800 disabled:opacity-50 disabled:scale-100"
+        className="flex items-center gap-2 rounded-md bg-indigo-600 px-4 sm:px-6 py-2 sm:py-3 font-bold text-white shadow-lg transition-transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:ring-offset-gray-800 disabled:opacity-50 disabled:scale-100"
       >
         <FiEye />
         <span>Reveal</span>
       </button>
 
+      {/* New Round 按鈕 - 響應式 padding */}
       <button
         onClick={onResetVotes}
-        className="flex items-center gap-2 rounded-md bg-gray-600 px-6 py-3 font-bold text-white shadow-lg transition-transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 focus:ring-offset-gray-800"
+        className="flex items-center gap-2 rounded-md bg-gray-600 px-4 sm:px-6 py-2 sm:py-3 font-bold text-white shadow-lg transition-transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 focus:ring-offset-gray-800"
       >
         <FiRefreshCw />
         <span>New Round</span>

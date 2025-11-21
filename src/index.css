@@ -13,9 +13,9 @@
   --color-primary-orange: #f37c34;
 }
 
-/* Prevent page-level scrollbar */
+/* Allow page-level scrollbar when needed */
 body {
-  overflow-y: hidden;
+  overflow-y: auto;
 }
 
 /* Global Scrollbar Styles */

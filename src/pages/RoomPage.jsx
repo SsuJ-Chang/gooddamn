@@ -3,6 +3,7 @@ import { Header } from '../components/Header';
 import { UserCard } from '../components/UserCard';
 import { VotingPanel } from '../components/VotingPanel';
 import { RoomControls } from '../components/RoomControls';
+import { VoteResults } from '../components/VoteResults';
 
 /**
  * 房間頁面元件
@@ -35,6 +36,9 @@ export function RoomPage() {
   const currentUser = users.find((u) => u.id === clientId);
   const isOwner = room.owner === clientId;
 
+  // 計算已投票的人數（用於手機版 Header 顯示）
+  const votedCount = users.filter((u) => u.vote !== null).length;
+
   // 計算哪個投票值應該被凸顯（最多票的選項）
   // 只有在有明確獲勝者時才凸顯（沒有平手）
   const calculateMostVotedValue = () => {
@@ -48,9 +52,12 @@ export function RoomPage() {
       }
     });
 
-    // 如果沒有投票或只有一個人投票，則不凸顯
+    // 計算有效投票數（排除 null 和 '?'）
+    const validVoteCount = users.filter(u => u.vote && u.vote !== '?').length;
+
+    // 如果沒有任何有效投票或只有一個人投票，則不凸顯
     const voteValues = Object.keys(voteCounts);
-    if (voteValues.length === 0 || users.filter(u => u.vote && u.vote !== '?').length === 1) {
+    if (voteValues.length === 0 || validVoteCount === 0 || validVoteCount === 1) {
       return null;
     }
 
@@ -67,47 +74,57 @@ export function RoomPage() {
   const highlightValue = calculateMostVotedValue();
 
   return (
-    // 主要佈局，垂直置中
-    <div className="flex h-screen items-center justify-center bg-gray-900 p-4 overflow-hidden">
-      <div className="flex w-full max-w-7xl flex-col gap-6">
-        {/* 1. Header 元件 */}
-        <Header
-          roomName={room.name}
-          roomId={room.id}
-          userCount={users.length}
-          onLeave={leaveRoom}
-        />
-
-        {/* 2. 使用者卡片的主要內容區域 */}
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
-          {users.map((user) => (
-            <UserCard
-              key={user.id}
-              user={user}
-              isCurrentUser={user.id === clientId}
-              votesVisible={room.votesVisible}
-              isHighlighted={room.votesVisible && user.vote === highlightValue}
-            />
-          ))}
-        </div>
-
-        {/* 3. 投票和控制的底部區域 */}
-        <div className="flex flex-col items-center gap-6">
-          {/* VotingPanel 投票面板 */}
-          <VotingPanel
-            currentUserVote={currentUser?.vote}
-            onVote={vote}
-            disabled={room.votesVisible}
+    // 主要容器：使用簡單的 block 佈局，不使用 flex
+    <div className="min-h-screen bg-gray-900">
+      {/* 內容區域：可滾動、置中 */}
+      <div className="mx-auto max-w-7xl p-2 sm:p-4">
+        <div className="flex flex-col gap-3 sm:gap-6 py-4">
+          {/* 1. Header 元件 - 傳遞投票統計給手機版顯示 */}
+          <Header
+            roomName={room.name}
+            userCount={users.length}
+            votedCount={votedCount}
+            onLeave={leaveRoom}
           />
 
-          {/* RoomControls 只在當前使用者是房主時顯示 */}
-          {isOwner && (
-            <RoomControls
-              onShowVotes={showVotes}
-              onResetVotes={resetVotes}
-              votesVisible={room.votesVisible}
-            />
+          {/* 2. 使用者卡片的主要內容區域 - 響應式顯示 */}
+          {/* 手機版（< 640px）隱藏，平板和桌面版顯示 */}
+          {/* 所有使用者都顯示，但只對有投票的使用者應用高亮效果 */}
+          <div className="hidden sm:grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 sm:gap-6">
+            {users.map((user) => (
+              <UserCard
+                key={user.id}
+                user={user}
+                isCurrentUser={user.id === clientId}
+                votesVisible={room.votesVisible}
+                isHighlighted={room.votesVisible && user.vote !== null && user.vote === highlightValue}
+              />
+            ))}
+          </div>
+
+          {/* 3. 投票結果統計（手機版專用）- 只在 votesVisible 時顯示 */}
+          {room.votesVisible && (
+            <VoteResults users={users} highlightValue={highlightValue} />
           )}
+
+          {/* 4. 投票和控制的底部區域 - 響應式間距 */}
+          <div className="flex flex-col items-center gap-3 sm:gap-6">
+            {/* VotingPanel 投票面板 */}
+            <VotingPanel
+              currentUserVote={currentUser?.vote}
+              onVote={vote}
+              disabled={room.votesVisible}
+            />
+
+            {/* RoomControls 只在當前使用者是房主時顯示 */}
+            {isOwner && (
+              <RoomControls
+                onShowVotes={showVotes}
+                onResetVotes={resetVotes}
+                votesVisible={room.votesVisible}
+              />
+            )}
+          </div>
         </div>
       </div>
     </div>

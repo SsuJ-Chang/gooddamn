@@ -148,7 +148,7 @@ function joinRoom(roomId, socket) {
 
   if (room && user && Object.keys(room.users).length < room.maxUsers) {
     socket.join(roomId);
-    room.users[socket.id] = { ...user, vote: null };
+    room.users[socket.id] = { ...user, id: socket.id, vote: null };
     console.log(`[Room] User ${socket.id} ("${user.name}") joined room ID: ${roomId}`);
 
     const roomList = getRoomListPayload();

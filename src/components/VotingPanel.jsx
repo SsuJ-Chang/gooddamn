@@ -1,3 +1,5 @@
+import { FaCheck } from 'react-icons/fa';
+
 /**
  * Planning Poker 使用的標準 Fibonacci 數列
  */
@@ -15,7 +17,8 @@ const VOTE_VALUES = ['1', '2', '3', '5', '8', '13', '20', '?'];
  */
 export function VotingPanel({ currentUserVote, onVote, disabled }) {
   return (
-    <div className="flex flex-wrap justify-center gap-4">
+    // 響應式投票面板：手機版減少按鈕大小和間距，增加觸控反饋
+    <div className="flex flex-wrap justify-center gap-3 sm:gap-4">
       {VOTE_VALUES.map((value) => {
         // 確定此按鈕是否是使用者當前選擇的按鈕
         const isSelected = currentUserVote === value;
@@ -26,18 +29,21 @@ export function VotingPanel({ currentUserVote, onVote, disabled }) {
             onClick={() => onVote(value)}
             disabled={disabled}
             className={`
-              w-16 h-20 
+              relative
+              w-14 sm:w-16 h-16 sm:h-20
               flex items-center justify-center 
               rounded-lg border-2
-              text-2xl font-bold 
-              transition-all duration-150
+              text-xl sm:text-2xl font-bold 
+              transition-all duration-200
               ${isSelected
-                ? 'bg-primary-orange border-primary-orange scale-110' // 選中狀態樣式
-                : 'bg-gray-700 border-gray-600' // 預設狀態樣式
+                ? 'bg-gradient-to-br from-primary-orange to-orange-600 border-primary-orange shadow-2xl shadow-primary-orange/90 ring-4 ring-primary-orange/60 text-white z-10' // 選中狀態：漸層背景、強陰影、光環、提升層級
+                : 'bg-gray-700 border-gray-600 text-white' // 預設狀態樣式
               }
               ${disabled
                 ? 'opacity-50 cursor-not-allowed' // 停用狀態樣式
-                : 'hover:border-primary-orange hover:scale-105' // 啟用按鈕的 hover 樣式
+                : isSelected
+                  ? 'cursor-pointer' // 選中時不需要 hover 效果
+                  : 'hover:border-primary-orange hover:scale-105 active:scale-95 active:bg-primary-orange/30 cursor-pointer' // 未選中時的 hover 和 active 樣式
               }
             `}
           >

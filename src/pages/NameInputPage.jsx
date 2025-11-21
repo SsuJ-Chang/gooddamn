@@ -35,8 +35,10 @@ export function NameInputPage() {
 
   return (
     <div className="flex h-screen flex-col items-center justify-center bg-gray-900">
-      <div className="rounded-lg bg-gray-800 p-8 shadow-2xl w-full max-w-sm">
-        <h1 className="mb-6 text-center text-3xl font-bold text-white">
+      {/* 響應式容器：手機版減少 padding */}
+      <div className="rounded-lg bg-gray-800 p-6 sm:p-8 shadow-2xl w-full max-w-sm">
+        {/* 響應式標題：手機版較小字體 */}
+        <h1 className="mb-6 text-center text-2xl sm:text-3xl font-bold text-white">
           Welcome to Gooddamn
         </h1>
         {/*
@@ -45,19 +47,21 @@ export function NameInputPage() {
         */}
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           <label htmlFor="name-input" className="sr-only">您的名字</label>
+          {/* 響應式輸入框：手機版減少垂直 padding */}
           <input
             id="name-input"
             type="text"
             value={localName}
             onChange={(e) => setLocalName(e.target.value)}
             placeholder="Enter your name"
-            className="rounded-md border-2 border-gray-600 bg-gray-700 px-4 py-3 text-lg text-white placeholder-gray-400 focus:border-primary-orange focus:outline-none focus:ring-2 focus:ring-primary-orange"
+            className="rounded-md border-2 border-gray-600 bg-gray-700 px-4 py-2.5 sm:py-3 text-lg text-white placeholder-gray-400 focus:border-primary-orange focus:outline-none focus:ring-2 focus:ring-primary-orange"
             required
             autoFocus
           />
+          {/* 響應式按鈕：手機版減少垂直 padding */}
           <button
             type="submit"
-            className="rounded-md bg-primary-orange px-4 py-3 text-lg font-bold text-white shadow-lg transition-transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-primary-orange focus:ring-offset-2 focus:ring-offset-gray-800 disabled:opacity-50"
+            className="rounded-md bg-primary-orange px-4 py-2.5 sm:py-3 text-lg font-bold text-white shadow-lg transition-transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-primary-orange focus:ring-offset-2 focus:ring-offset-gray-800 disabled:opacity-50"
             disabled={!localName.trim()}
           >
             Join

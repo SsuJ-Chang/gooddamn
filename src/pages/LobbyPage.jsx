@@ -28,15 +28,18 @@ export function LobbyPage() {
 
   return (
     <div className="flex h-screen flex-col items-center justify-center bg-gray-900">
-      <div className="rounded-lg bg-gray-800 p-8 shadow-2xl w-full max-w-md">
-        <h1 className="mb-2 text-center text-3xl font-bold text-white">Lobby</h1>
-        <p className="mb-8 text-center text-lg text-gray-300">
+      {/* 響應式容器：手機版減少 padding */}
+      <div className="rounded-lg bg-gray-800 p-6 sm:p-8 shadow-2xl w-full max-w-md">
+        {/* 響應式標題：手機版較小字體 */}
+        <h1 className="mb-2 text-center text-2xl sm:text-3xl font-bold text-white">Lobby</h1>
+        <p className="mb-8 text-center text-base sm:text-lg text-gray-300">
           Welcome, <span className="font-bold text-primary-orange">{name}</span>! Let's Gooddamn!
         </p>
 
         {/* 建立房間區塊 */}
         <div className="mb-8">
-          <h2 className="mb-4 text-xl font-semibold text-white">Create a New Room</h2>
+          {/* 響應式次標題 */}
+          <h2 className="mb-4 text-lg sm:text-xl font-semibold text-white">Create a New Room</h2>
           <form
             onSubmit={(e) => {
               e.preventDefault();
@@ -46,15 +49,17 @@ export function LobbyPage() {
             }}
             className="flex flex-col gap-4"
           >
+            {/* 響應式輸入框 */}
             <input
               type="text"
               placeholder="Enter Room Name (Optional)"
-              className="rounded-md border-2 border-gray-600 bg-gray-700 px-4 py-3 text-lg text-white placeholder-gray-400 focus:border-primary-orange focus:outline-none focus:ring-2 focus:ring-primary-orange"
+              className="rounded-md border-2 border-gray-600 bg-gray-700 px-4 py-2.5 sm:py-3 text-lg text-white placeholder-gray-400 focus:border-primary-orange focus:outline-none focus:ring-2 focus:ring-primary-orange"
               id="room-name-input"
             />
+            {/* 響應式按鈕 */}
             <button
               type="submit"
-              className="w-full rounded-md bg-primary-orange px-4 py-3 text-lg font-bold text-white shadow-lg transition-transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-primary-orange focus:ring-offset-2 focus:ring-offset-gray-800"
+              className="w-full rounded-md bg-primary-orange px-4 py-2.5 sm:py-3 text-lg font-bold text-white shadow-lg transition-transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-primary-orange focus:ring-offset-2 focus:ring-offset-gray-800"
             >
               Create Room
             </button>
@@ -63,7 +68,8 @@ export function LobbyPage() {
 
         {/* 可用房間列表區塊 */}
         <div className="mb-8">
-          <h2 className="mb-4 text-xl font-semibold text-white">Available Rooms</h2>
+          {/* 響應式次標題 */}
+          <h2 className="mb-4 text-lg sm:text-xl font-semibold text-white">Available Rooms</h2>
           {roomList.length === 0 ? (
             <p className="text-center text-gray-400">No rooms available. Create one!</p>
           ) : (
@@ -71,7 +77,7 @@ export function LobbyPage() {
               {roomList.map((room) => (
                 <div
                   key={room.id}
-                  className="flex items-center justify-between rounded-md bg-gray-700 p-4 shadow-md transition-colors hover:bg-gray-600"
+                  className="flex items-center justify-between rounded-md bg-gray-700 p-3 sm:p-4 shadow-md transition-colors hover:bg-gray-600"
                 >
                   <div>
                     <h3 className="font-bold text-white">{room.name}</h3>
@@ -102,6 +108,6 @@ export function LobbyPage() {
           <p className="mt-4 text-center text-red-400">{error}</p>
         )}
       </div>
-    </div>
+    </div >
   );
 }
