@@ -5,15 +5,12 @@ services:
     build:
       context: ./server
       dockerfile: Dockerfile
-    container_name: planning-poker-backend
+    container_name: gooddamn-backend
     restart: unless-stopped
-    networks:
-      - gooddamn-net
+    ports:
+      - "3001:3001"
     environment:
       - NODE_ENV=production
-      # 可選：如果需要配置其他環境變數
-      # - LOG_LEVEL=info
-      # - MAX_USERS_PER_ROOM=20
     healthcheck:
       test: [ "CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3001" ]
       interval: 30s
@@ -31,27 +28,16 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: planning-poker-frontend
+    container_name: gooddamn-frontend
     restart: unless-stopped
     ports:
-      - "80:80"
-      # 如果配置了 SSL，取消下面的註釋
-      # - "443:443"
+      - "8080:80"
     depends_on:
       backend:
         condition: service_healthy
-    networks:
-      - gooddamn-net
     # 生產環境日誌配置
     logging:
       driver: "json-file"
       options:
         max-size: "10m"
         max-file: "3"
-    # 可選：如果需要掛載 SSL 證書
-    # volumes:
-    #   - ./ssl:/etc/nginx/ssl:ro
-
-networks:
-  gooddamn-net:
-    driver: bridge
