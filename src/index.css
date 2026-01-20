@@ -10,7 +10,26 @@
 @import "tailwindcss";
 
 @theme {
-  --color-primary-orange: #f37c34;
+  /* Morandi Turquoise / Tiffany Green Theme (from suguru project) */
+  /* Primary Accent Colors */
+  --color-primary: #5e8c8a;
+  --color-primary-light: #87adaa;
+  --color-primary-soft: #a5c1be;
+
+  /* Background Colors */
+  --color-bg-primary: #0f171a;
+  --color-bg-secondary: #162124;
+  --color-bg-tertiary: #1e2b2e;
+  --color-bg-card: rgba(30, 43, 46, 0.6);
+  --color-bg-card-hover: rgba(40, 58, 61, 0.8);
+
+  /* Text Colors */
+  --color-text-primary: #e0e6e6;
+  --color-text-secondary: #9db0b0;
+  --color-text-muted: #6b7d7d;
+
+  /* Legacy alias for compatibility */
+  --color-primary-orange: #5e8c8a;
 }
 
 /* Allow page-level scrollbar when needed */
@@ -18,10 +37,10 @@ body {
   overflow-y: auto;
 }
 
-/* Global Scrollbar Styles */
+/* Global Scrollbar Styles - Morandi Turquoise Theme */
 * {
   scrollbar-width: thin;
-  scrollbar-color: #4b5563 #111827;
+  scrollbar-color: #5e8c8a #0f171a;
   /* thumb and track colors for Firefox */
 }
 
@@ -32,20 +51,20 @@ body {
 }
 
 *::-webkit-scrollbar-track {
-  background: #111827;
-  /* bg-gray-900 */
+  background: #0f171a;
+  /* bg-primary */
   border-radius: 4px;
 }
 
 *::-webkit-scrollbar-thumb {
-  background: #4b5563;
-  /* bg-gray-600 */
+  background: #5e8c8a;
+  /* primary color */
   border-radius: 4px;
 }
 
 *::-webkit-scrollbar-thumb:hover {
-  background: #6b7280;
-  /* bg-gray-500 */
+  background: #87adaa;
+  /* primary-light */
 }
 
 /* Shake animation for highlighted vote cards */

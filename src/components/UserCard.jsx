@@ -1,4 +1,5 @@
 import { FiCheck, FiHelpCircle } from 'react-icons/fi';
+import { FaCrown } from 'react-icons/fa';
 
 /**
  * 使用者卡片元件
@@ -9,10 +10,11 @@ import { FiCheck, FiHelpCircle } from 'react-icons/fi';
  * @param {object} props - 傳遞給元件的屬性
  * @param {object} props.user - 使用者物件，包含名字和投票
  * @param {boolean} props.isCurrentUser - 如果此卡片代表正在查看應用程式的人，則為 true
+ * @param {boolean} props.isHost - 如果此使用者是房主，則為 true
  * @param {boolean} props.votesVisible - 如果投票已被房主揭示，則為 true
  * @param {boolean} props.isHighlighted - 如果此卡片擁有最多票的值，則為 true
  */
-export function UserCard({ user, isCurrentUser, votesVisible, isHighlighted = false }) {
+export function UserCard({ user, isCurrentUser, isHost = false, votesVisible, isHighlighted = false }) {
   // 衍生布林值，用於輕鬆檢查使用者是否已提交投票
   const hasVoted = user.vote !== null;
 
@@ -21,12 +23,20 @@ export function UserCard({ user, isCurrentUser, votesVisible, isHighlighted = fa
     // `relative` 對於在其內部絕對定位使用者名稱至關重要
     // `h-32 sm:h-40` 手機版較矮，桌面版較高
     // `rounded-lg` 給它漂亮的圓角
-    // `bg-primary-orange` 從我們的主題設定背景顏色
+    // `bg-primary` 從我們的主題設定背景顏色
     // `overflow-hidden` 是一個好習慣，確保沒有東西溢出圓角
     <div className={`relative h-32 sm:h-40 rounded-lg text-white shadow-lg overflow-hidden border-2 ${isHighlighted
       ? 'bg-gradient-to-br from-yellow-400 to-amber-500 border-yellow-300 ring-4 ring-yellow-400 animate-[gentle-shake_0.5s_ease-in-out_infinite]'
-      : 'bg-primary-orange border-white'
+      : 'bg-primary border-primary-light'
       }`}>
+
+      {/* Host 標示 - 顯示在卡片左上角 */}
+      {isHost && (
+        <div className="absolute top-2 left-2">
+          <FaCrown className="text-2xl text-yellow-400 drop-shadow-lg" />
+        </div>
+      )}
+
       {/*
        * 投票顯示容器 - 響應式大小
        * 定位在卡片高度的上方
@@ -37,10 +47,10 @@ export function UserCard({ user, isCurrentUser, votesVisible, isHighlighted = fa
           // --- 在投票顯示之前要展示的內容 ---
           hasVoted ? (
             // 如果使用者已投票，顯示綠色勾選記號 - 響應式大小
-            <FiCheck className="text-5xl sm:text-7xl text-green-300 drop-shadow-lg" />
+            <FiCheck className="text-5xl sm:text-7xl text-primary-soft drop-shadow-lg" />
           ) : (
             // 如果使用者尚未投票，顯示灰色問號 - 響應式大小
-            <FiHelpCircle className="text-5xl sm:text-7xl text-gray-200 drop-shadow-lg" />
+            <FiHelpCircle className="text-5xl sm:text-7xl text-primary-light drop-shadow-lg" />
           )
         ) : (
           // --- 在投票顯示之後要展示的內容 ---
@@ -69,3 +79,4 @@ export function UserCard({ user, isCurrentUser, votesVisible, isHighlighted = fa
     </div>
   );
 }
+

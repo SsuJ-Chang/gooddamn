@@ -17,10 +17,10 @@ export function Header({ roomName, userCount, votedCount, onLeave }) {
 
   return (
     // 響應式 Header：手機版減少 padding
-    <header className="flex flex-wrap items-center justify-between gap-2 sm:gap-4 rounded-lg bg-gray-800 p-2 sm:p-4 shadow-md">
+    <header className="flex flex-wrap items-center justify-between gap-2 sm:gap-4 rounded-lg bg-bg-secondary p-2 sm:p-4 shadow-md border border-bg-tertiary">
       {/* 左側區塊：房間名稱 (手機版縮小字體) */}
       <div className="flex flex-col">
-        <h1 className="text-lg sm:text-2xl font-bold text-white">
+        <h1 className="text-lg sm:text-2xl font-bold text-text-primary">
           {roomName || 'Planning Poker'}
         </h1>
       </div>
@@ -30,8 +30,8 @@ export function Header({ roomName, userCount, votedCount, onLeave }) {
         {/* 投票統計：只在手機版且有 votedCount 時顯示 */}
         {votedCount !== undefined && (
           <div className="flex items-center gap-1 text-sm sm:hidden">
-            <FiCheck className="text-green-400" />
-            <span className="font-semibold text-white">
+            <FiCheck className="text-primary-light" />
+            <span className="font-semibold text-text-primary">
               {votedCount}/{userCount}
             </span>
           </div>
@@ -39,14 +39,14 @@ export function Header({ roomName, userCount, votedCount, onLeave }) {
 
         {/* 使用者數量：桌面版顯示 */}
         <div className="hidden sm:flex items-center gap-2 text-lg">
-          <FiUsers className="text-gray-400" />
-          <span className="font-semibold text-white">{userCount}</span>
+          <FiUsers className="text-text-muted" />
+          <span className="font-semibold text-text-primary">{userCount}</span>
         </div>
 
         {/* 離開按鈕：手機版只顯示圖標，桌面版顯示文字 */}
         <button
           onClick={onLeave}
-          className="flex items-center gap-2 rounded-md bg-red-600 px-2 sm:px-4 py-1.5 sm:py-2 font-bold text-white transition-colors hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 focus:ring-offset-gray-800"
+          className="flex items-center gap-2 rounded-md bg-red-600 px-2 sm:px-4 py-1.5 sm:py-2 font-bold text-white transition-colors hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 focus:ring-offset-bg-secondary"
         >
           <FiLogOut />
           <span className="hidden sm:inline">Leave</span>

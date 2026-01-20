@@ -74,10 +74,10 @@ export function RoomPage() {
   const highlightValue = calculateMostVotedValue();
 
   return (
-    // 主要容器：使用簡單的 block 佈局，不使用 flex
-    <div className="min-h-screen bg-gray-900">
+    // 主要容器：使用 flex 垂直置中，避免不必要的 scrollbar
+    <div className="h-screen bg-bg-primary flex flex-col overflow-hidden">
       {/* 內容區域：可滾動、置中 */}
-      <div className="mx-auto max-w-7xl p-2 sm:p-4">
+      <div className="flex-1 flex flex-col justify-center mx-auto max-w-7xl w-full p-2 sm:p-4 overflow-auto">
         <div className="flex flex-col gap-3 sm:gap-6 py-4">
           {/* 1. Header 元件 - 傳遞投票統計給手機版顯示 */}
           <Header
@@ -96,6 +96,7 @@ export function RoomPage() {
                 key={user.id}
                 user={user}
                 isCurrentUser={user.id === clientId}
+                isHost={user.id === room.owner}
                 votesVisible={room.votesVisible}
                 isHighlighted={room.votesVisible && user.vote !== null && user.vote === highlightValue}
               />

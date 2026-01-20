@@ -27,19 +27,19 @@ export function LobbyPage() {
 
 
   return (
-    <div className="flex h-screen flex-col items-center justify-center bg-gray-900">
+    <div className="flex h-screen flex-col items-center justify-center bg-bg-primary">
       {/* 響應式容器：手機版減少 padding */}
-      <div className="rounded-lg bg-gray-800 p-6 sm:p-8 shadow-2xl w-full max-w-md">
+      <div className="rounded-lg bg-bg-secondary p-6 sm:p-8 shadow-2xl w-full max-w-md border border-bg-tertiary">
         {/* 響應式標題：手機版較小字體 */}
-        <h1 className="mb-2 text-center text-2xl sm:text-3xl font-bold text-white">Lobby</h1>
-        <p className="mb-8 text-center text-base sm:text-lg text-gray-300">
-          Welcome, <span className="font-bold text-primary-orange">{name}</span>! Let's Gooddamn!
+        <h1 className="mb-2 text-center text-2xl sm:text-3xl font-bold text-text-primary">Lobby</h1>
+        <p className="mb-8 text-center text-base sm:text-lg text-text-secondary">
+          Welcome, <span className="font-bold text-primary">{name}</span>! Let's Gooddamn!
         </p>
 
         {/* 建立房間區塊 */}
         <div className="mb-8">
           {/* 響應式次標題 */}
-          <h2 className="mb-4 text-lg sm:text-xl font-semibold text-white">Create a New Room</h2>
+          <h2 className="mb-4 text-lg sm:text-xl font-semibold text-text-primary">Create a New Room</h2>
           <form
             onSubmit={(e) => {
               e.preventDefault();
@@ -53,13 +53,13 @@ export function LobbyPage() {
             <input
               type="text"
               placeholder="Enter Room Name (Optional)"
-              className="rounded-md border-2 border-gray-600 bg-gray-700 px-4 py-2.5 sm:py-3 text-lg text-white placeholder-gray-400 focus:border-primary-orange focus:outline-none focus:ring-2 focus:ring-primary-orange"
+              className="rounded-md border-2 border-bg-tertiary bg-bg-tertiary px-4 py-2.5 sm:py-3 text-lg text-text-primary placeholder-text-muted focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary"
               id="room-name-input"
             />
             {/* 響應式按鈕 */}
             <button
               type="submit"
-              className="w-full rounded-md bg-primary-orange px-4 py-2.5 sm:py-3 text-lg font-bold text-white shadow-lg transition-transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-primary-orange focus:ring-offset-2 focus:ring-offset-gray-800"
+              className="w-full rounded-md bg-primary px-4 py-2.5 sm:py-3 text-lg font-bold text-white shadow-lg transition-transform hover:scale-105 hover:bg-primary-light focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-bg-secondary"
             >
               Create Room
             </button>
@@ -69,25 +69,25 @@ export function LobbyPage() {
         {/* 可用房間列表區塊 */}
         <div className="mb-8">
           {/* 響應式次標題 */}
-          <h2 className="mb-4 text-lg sm:text-xl font-semibold text-white">Available Rooms</h2>
+          <h2 className="mb-4 text-lg sm:text-xl font-semibold text-text-primary">Available Rooms</h2>
           {roomList.length === 0 ? (
-            <p className="text-center text-gray-400">No rooms available. Create one!</p>
+            <p className="text-center text-text-muted">No rooms available. Create one!</p>
           ) : (
             <div className="flex flex-col gap-3 max-h-60 overflow-y-auto pr-2 custom-scrollbar">
               {roomList.map((room) => (
                 <div
                   key={room.id}
-                  className="flex items-center justify-between rounded-md bg-gray-700 p-3 sm:p-4 shadow-md transition-colors hover:bg-gray-600"
+                  className="flex items-center justify-between rounded-md bg-bg-tertiary p-3 sm:p-4 shadow-md transition-colors hover:bg-bg-card-hover"
                 >
                   <div>
-                    <h3 className="font-bold text-white">{room.name}</h3>
-                    <p className="text-sm text-gray-400">
+                    <h3 className="font-bold text-text-primary">{room.name}</h3>
+                    <p className="text-sm text-text-muted">
                       Host: {room.ownerName} • {room.userCount}/{room.maxUsers} Users
                     </p>
                   </div>
                   <button
                     onClick={() => joinRoom(room.id)}
-                    className="rounded-md bg-green-600 px-3 py-1 text-sm font-bold text-white shadow-sm transition-transform hover:scale-105 hover:bg-green-500 focus:outline-none focus:ring-2 focus:ring-green-500"
+                    className="rounded-md bg-primary px-3 py-1 text-sm font-bold text-white shadow-sm transition-transform hover:scale-105 hover:bg-primary-light focus:outline-none focus:ring-2 focus:ring-primary"
                     disabled={room.userCount >= room.maxUsers}
                   >
                     {room.userCount >= room.maxUsers ? 'Full' : 'Join'}
@@ -99,7 +99,6 @@ export function LobbyPage() {
         </div>
 
 
-
         {/*
           錯誤顯示：如果 `error` 狀態不為 null，表示伺服器發送了錯誤
           （例如，房間未找到），我們將向使用者顯示它。
@@ -108,6 +107,6 @@ export function LobbyPage() {
           <p className="mt-4 text-center text-red-400">{error}</p>
         )}
       </div>
-    </div >
+    </div>
   );
 }

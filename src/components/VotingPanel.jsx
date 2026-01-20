@@ -36,14 +36,14 @@ export function VotingPanel({ currentUserVote, onVote, disabled }) {
               text-xl sm:text-2xl font-bold 
               transition-all duration-200
               ${isSelected
-                ? 'bg-gradient-to-br from-primary-orange to-orange-600 border-primary-orange shadow-2xl shadow-primary-orange/90 ring-4 ring-primary-orange/60 text-white z-10' // 選中狀態：漸層背景、強陰影、光環、提升層級
-                : 'bg-gray-700 border-gray-600 text-white' // 預設狀態樣式
+                ? 'bg-gradient-to-br from-primary to-primary-light border-primary shadow-2xl shadow-primary/90 ring-4 ring-primary/60 text-white z-10' // 選中狀態：漸層背景、強陰影、光環、提升層級
+                : 'bg-bg-tertiary border-bg-card text-text-primary' // 預設狀態樣式
               }
               ${disabled
                 ? 'opacity-50 cursor-not-allowed' // 停用狀態樣式
                 : isSelected
                   ? 'cursor-pointer' // 選中時不需要 hover 效果
-                  : 'hover:border-primary-orange hover:scale-105 active:scale-95 active:bg-primary-orange/30 cursor-pointer' // 未選中時的 hover 和 active 樣式
+                  : 'hover:border-primary hover:scale-105 active:scale-95 active:bg-primary/30 cursor-pointer' // 未選中時的 hover 和 active 樣式
               }
             `}
           >
@@ -54,3 +54,4 @@ export function VotingPanel({ currentUserVote, onVote, disabled }) {
     </div>
   );
 }
+

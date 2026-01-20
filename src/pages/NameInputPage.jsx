@@ -34,11 +34,11 @@ export function NameInputPage() {
   };
 
   return (
-    <div className="flex h-screen flex-col items-center justify-center bg-gray-900">
+    <div className="flex h-screen flex-col items-center justify-center bg-bg-primary">
       {/* 響應式容器：手機版減少 padding */}
-      <div className="rounded-lg bg-gray-800 p-6 sm:p-8 shadow-2xl w-full max-w-sm">
+      <div className="rounded-lg bg-bg-secondary p-6 sm:p-8 shadow-2xl w-full max-w-sm border border-bg-tertiary">
         {/* 響應式標題：手機版較小字體 */}
-        <h1 className="mb-6 text-center text-2xl sm:text-3xl font-bold text-white">
+        <h1 className="mb-6 text-center text-2xl sm:text-3xl font-bold text-text-primary">
           Welcome to Gooddamn
         </h1>
         {/*
@@ -54,14 +54,14 @@ export function NameInputPage() {
             value={localName}
             onChange={(e) => setLocalName(e.target.value)}
             placeholder="Enter your name"
-            className="rounded-md border-2 border-gray-600 bg-gray-700 px-4 py-2.5 sm:py-3 text-lg text-white placeholder-gray-400 focus:border-primary-orange focus:outline-none focus:ring-2 focus:ring-primary-orange"
+            className="rounded-md border-2 border-bg-tertiary bg-bg-tertiary px-4 py-2.5 sm:py-3 text-lg text-text-primary placeholder-text-muted focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary"
             required
             autoFocus
           />
           {/* 響應式按鈕：手機版減少垂直 padding */}
           <button
             type="submit"
-            className="rounded-md bg-primary-orange px-4 py-2.5 sm:py-3 text-lg font-bold text-white shadow-lg transition-transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-primary-orange focus:ring-offset-2 focus:ring-offset-gray-800 disabled:opacity-50"
+            className="rounded-md bg-primary px-4 py-2.5 sm:py-3 text-lg font-bold text-white shadow-lg transition-transform hover:scale-105 hover:bg-primary-light focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-bg-secondary disabled:opacity-50"
             disabled={!localName.trim()}
           >
             Join

@@ -34,7 +34,7 @@ export function VoteResults({ users, highlightValue }) {
   const maxCount = sortedVotes.length > 0 ? sortedVotes[0].count : 1;
 
   return (
-    <div className="sm:hidden bg-gray-800 rounded-lg p-4 border border-gray-700">
+    <div className="sm:hidden bg-bg-secondary rounded-lg p-4 border border-bg-tertiary">
       {/* 投票統計列表 */}
       <div className="flex flex-col gap-3">
         {sortedVotes.map(({ value, count, percentage }) => {
@@ -48,14 +48,14 @@ export function VoteResults({ users, highlightValue }) {
               key={value}
               className={`rounded-lg p-3 ${isHighlighted
                 ? 'bg-gradient-to-r from-yellow-400/20 to-amber-500/20 border border-yellow-400'
-                : 'bg-gray-700/50'
+                : 'bg-bg-tertiary/50'
                 }`}
             >
               {/* 頂部:投票值和統計 */}
               <div className="flex justify-between items-center mb-2">
                 <div className="flex items-center gap-2">
                   <span
-                    className={`text-2xl font-bold ${isHighlighted ? 'text-yellow-300' : 'text-primary-orange'
+                    className={`text-2xl font-bold ${isHighlighted ? 'text-yellow-300' : 'text-primary'
                       }`}
                   >
                     {value}
@@ -68,21 +68,21 @@ export function VoteResults({ users, highlightValue }) {
 
                 {/* 人數和百分比 */}
                 <div className="flex items-center gap-2">
-                  <span className="text-sm font-semibold text-gray-300">
+                  <span className="text-sm font-semibold text-text-secondary">
                     {count}人
                   </span>
-                  <span className="text-xs text-gray-400">
+                  <span className="text-xs text-text-muted">
                     ({percentage.toFixed(0)}%)
                   </span>
                 </div>
               </div>
 
               {/* 柱狀圖 */}
-              <div className="h-2 bg-gray-600 rounded-full overflow-hidden">
+              <div className="h-2 bg-bg-tertiary rounded-full overflow-hidden">
                 <div
                   className={`h-full rounded-full transition-all duration-500 ${isHighlighted
                     ? 'bg-gradient-to-r from-yellow-400 to-amber-500'
-                    : 'bg-primary-orange'
+                    : 'bg-primary'
                     }`}
                   style={{ width: `${barWidth}%` }}
                 ></div>
@@ -94,3 +94,4 @@ export function VoteResults({ users, highlightValue }) {
     </div>
   );
 }
+
