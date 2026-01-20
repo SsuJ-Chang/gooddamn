@@ -75,7 +75,7 @@ export function RoomPage() {
 
   return (
     // 主要容器：使用 flex 垂直置中，避免不必要的 scrollbar
-    <div className="h-screen bg-bg-primary flex flex-col overflow-hidden">
+    <div className="flex-1 bg-bg-primary flex flex-col overflow-hidden">
       {/* 內容區域：可滾動、置中 */}
       <div className="flex-1 flex flex-col justify-center mx-auto max-w-7xl w-full p-2 sm:p-4 overflow-auto">
         <div className="flex flex-col gap-3 sm:gap-6 py-4">

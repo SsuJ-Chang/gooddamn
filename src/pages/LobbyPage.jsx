@@ -27,9 +27,9 @@ export function LobbyPage() {
 
 
   return (
-    <div className="flex h-screen flex-col items-center justify-center bg-bg-primary">
+    <div className="flex flex-1 flex-col items-center justify-center bg-bg-primary py-8">
       {/* 響應式容器：手機版減少 padding */}
-      <div className="rounded-lg bg-bg-secondary p-6 sm:p-8 shadow-2xl w-full max-w-md border border-bg-tertiary">
+      <div className="rounded-lg bg-bg-secondary p-6 sm:p-8 shadow-2xl w-full max-w-lg border border-bg-tertiary">
         {/* 響應式標題：手機版較小字體 */}
         <h1 className="mb-2 text-center text-2xl sm:text-3xl font-bold text-text-primary">Lobby</h1>
         <p className="mb-8 text-center text-base sm:text-lg text-text-secondary">

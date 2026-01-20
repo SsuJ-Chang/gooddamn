@@ -34,7 +34,7 @@ export function NameInputPage() {
   };
 
   return (
-    <div className="flex h-screen flex-col items-center justify-center bg-bg-primary">
+    <div className="flex flex-1 flex-col items-center justify-center bg-bg-primary py-8">
       {/* 響應式容器：手機版減少 padding */}
       <div className="rounded-lg bg-bg-secondary p-6 sm:p-8 shadow-2xl w-full max-w-sm border border-bg-tertiary">
         {/* 響應式標題：手機版較小字體 */}

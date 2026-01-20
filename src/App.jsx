@@ -2,6 +2,8 @@ import { useStore } from './store/useStore';
 import { NameInputPage } from './pages/NameInputPage';
 import { LobbyPage } from './pages/LobbyPage';
 import { RoomPage } from './pages/RoomPage';
+import { NavHeader } from './components/NavHeader';
+import { Footer } from './components/Footer';
 
 /**
  * 主應用程式元件 (App.jsx)
@@ -36,11 +38,20 @@ function App() {
   };
 
   // 應用程式的主容器。確保一致的佈局。
-  // `renderCurrentPage()` 被呼叫來顯示當前活動的頁面。
+  // 使用 flex 佈局讓 Footer 始終在底部
   return (
-    <main className="container mx-auto max-w-4xl p-4">
-      {renderCurrentPage()}
-    </main>
+    <div className="min-h-screen flex flex-col bg-bg-primary">
+      {/* 導航頭部 */}
+      <NavHeader />
+
+      {/* 主要內容區域 - 加上頂部 padding 避免被固定的 Header 遮住 */}
+      <main className="flex-1 flex flex-col items-center justify-center pt-14 sm:pt-16">
+        {renderCurrentPage()}
+      </main>
+
+      {/* 頁尾 */}
+      <Footer />
+    </div>
   );
 }
 
