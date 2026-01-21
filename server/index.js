@@ -71,6 +71,11 @@ io.on('connection', (socket) => {
       finalRoomName = `${sanitizedRoomName} - ${counter}`;
     }
 
+    // 🛡️ 房間超時設定：1 小時
+    const ROOM_TIMEOUT_MS = 60 * 60 * 1000; // 1 hour in milliseconds
+    const createdAt = Date.now();
+    const expiresAt = createdAt + ROOM_TIMEOUT_MS;
+
     rooms[roomId] = {
       id: roomId,
       name: finalRoomName,
@@ -79,9 +84,24 @@ io.on('connection', (socket) => {
       users: {},
       votesVisible: false,
       votingPattern: 'fibonacci',
+      createdAt: createdAt,
+      expiresAt: expiresAt,
     };
 
-    console.log(`[Room] User ${socket.id} created room "${finalRoomName}" (ID: ${roomId}) [${currentRoomCount + 1}/${MAX_ROOMS}]`);
+    // 設定房間自動過期刪除
+    setTimeout(() => {
+      if (rooms[roomId]) {
+        console.log(`[Timeout] Room "${finalRoomName}" (ID: ${roomId}) has expired and will be deleted.`);
+        // 通知所有在房間內的使用者
+        io.to(roomId).emit('roomExpired', { message: 'Room has expired after 1 hour.' });
+        // 刪除房間
+        delete rooms[roomId];
+        // 更新房間列表
+        io.emit('roomListUpdated', getRoomListPayload());
+      }
+    }, ROOM_TIMEOUT_MS);
+
+    console.log(`[Room] User ${socket.id} created room "${finalRoomName}" (ID: ${roomId}) [${currentRoomCount + 1}/${MAX_ROOMS}] - expires at ${new Date(expiresAt).toLocaleTimeString()}`);
     const joined = joinRoom(roomId, socket);
 
     if (!joined) {

@@ -1,4 +1,5 @@
 import { FiUsers, FiLogOut, FiCheck } from 'react-icons/fi';
+import { RoomTimer } from './RoomTimer';
 
 /**
  * Header 頁首元件
@@ -11,18 +12,21 @@ import { FiUsers, FiLogOut, FiCheck } from 'react-icons/fi';
  * @param {string} props.roomName - 房間的名稱
  * @param {number} props.userCount - 目前在房間中的使用者數量
  * @param {number} props.votedCount - 已投票的使用者數量 (mobile only)
+ * @param {number} props.expiresAt - 房間過期時間戳
  * @param {function} props.onLeave - 點擊「離開」按鈕時要呼叫的函數
  */
-export function Header({ roomName, userCount, votedCount, onLeave }) {
+export function Header({ roomName, userCount, votedCount, expiresAt, onLeave }) {
 
   return (
     // 響應式 Header：手機版減少 padding
     <header className="flex flex-wrap items-center justify-between gap-2 sm:gap-4 rounded-lg bg-bg-secondary p-2 sm:p-4 shadow-md border border-bg-tertiary">
-      {/* 左側區塊：房間名稱 (手機版縮小字體) */}
-      <div className="flex flex-col">
+      {/* 左側區塊：房間名稱和倒數計時 */}
+      <div className="flex flex-col gap-1">
         <h1 className="text-lg sm:text-2xl font-bold text-text-primary">
           {roomName || 'Planning Poker'}
         </h1>
+        {/* 房間倒數計時器 */}
+        {expiresAt && <RoomTimer expiresAt={expiresAt} />}
       </div>
 
       {/* 右側區塊：使用者數量、投票統計（手機版）和離開按鈕 */}
@@ -55,3 +59,4 @@ export function Header({ roomName, userCount, votedCount, onLeave }) {
     </header>
   );
 }
+

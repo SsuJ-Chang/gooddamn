@@ -84,6 +84,7 @@ export function RoomPage() {
             roomName={room.name}
             userCount={users.length}
             votedCount={votedCount}
+            expiresAt={room.expiresAt}
             onLeave={leaveRoom}
           />
 

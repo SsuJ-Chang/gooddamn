@@ -81,22 +81,19 @@ export function LobbyPage() {
         {/* 可用房間列表區塊 */}
         <div className="mb-8">
           {/* 響應式次標題 */}
-          <h2 className="mb-4 text-lg sm:text-xl font-semibold text-text-primary">Available Rooms</h2>
+          <h2 className="mb-4 text-lg sm:text-xl font-semibold text-text-primary">Rooms</h2>
           {roomList.length === 0 ? (
             <p className="text-center text-text-muted">No rooms available. Create one!</p>
           ) : (
-            <div className="flex flex-col gap-3 max-h-60 overflow-y-auto pr-2 custom-scrollbar">
+            <div className="flex flex-col gap-2 max-h-60 overflow-y-auto pr-2 custom-scrollbar">
               {roomList.map((room) => (
                 <div
                   key={room.id}
-                  className="flex items-center justify-between rounded-md bg-bg-tertiary p-3 sm:p-4 shadow-md transition-colors hover:bg-bg-card-hover"
+                  className="flex items-center justify-between rounded-md bg-bg-tertiary px-3 py-2 shadow-md transition-colors hover:bg-bg-card-hover"
                 >
-                  <div>
-                    <h3 className="font-bold text-text-primary">{room.name}</h3>
-                    <p className="text-sm text-text-muted">
-                      Host: {room.ownerName} • {room.userCount}/{room.maxUsers} Users
-                    </p>
-                  </div>
+                  <h3 className="font-bold text-text-primary">
+                    {room.name} <span className="font-normal text-text-muted">({room.userCount}/{room.maxUsers})</span>
+                  </h3>
                   <button
                     onClick={() => joinRoom(room.id)}
                     className="rounded-md bg-primary px-3 py-1 text-sm font-bold text-white shadow-sm transition-transform hover:scale-105 hover:bg-primary-light focus:outline-none focus:ring-2 focus:ring-primary"

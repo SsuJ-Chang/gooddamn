@@ -98,6 +98,12 @@ export const useStore = create((set, get) => ({
       set({ error: errorData });
     });
 
+    socket.on('roomExpired', (data) => {
+      // 房間已過期，將使用者踢回大廳
+      console.log('[Socket] Room expired:', data);
+      set({ room: null, error: data });
+    });
+
     // 手動連線 socket。`autoConnect` 在 `socket.js` 中被設定為 false
     socket.connect();
   },
