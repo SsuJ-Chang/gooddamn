@@ -120,6 +120,23 @@ io.on('connection', (socket) => {
     leaveRoom(roomId, socket);
   });
 
+  // 踢出使用者事件：房主想要將某人踢出房間
+  socket.on('kickUser', ({ roomId, targetSocketId }) => {
+    const room = rooms[roomId];
+    // 🛡️ 保護機制：只有房主可以踢人，且不能踢自己
+    if (room && room.owner === socket.id && targetSocketId !== socket.id) {
+      const targetSocket = io.sockets.sockets.get(targetSocketId);
+      if (targetSocket) {
+        console.log(`[Kick] Owner ${socket.id} kicked user ${targetSocketId} from room ${roomId}`);
+        // 通知目標使用者被踢出了
+        targetSocket.emit('roomError', { message: 'You have been kicked from the room by the host.' });
+        targetSocket.emit('kicked');
+        // 執行離開房間邏輯
+        leaveRoom(roomId, targetSocket);
+      }
+    }
+  });
+
   // 投票事件：使用者提交他們的投票
   socket.on('vote', ({ roomId, vote }) => {
     const room = rooms[roomId];

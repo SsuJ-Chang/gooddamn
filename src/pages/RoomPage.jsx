@@ -21,6 +21,7 @@ export function RoomPage() {
   const vote = useStore((state) => state.vote);
   const showVotes = useStore((state) => state.showVotes);
   const resetVotes = useStore((state) => state.resetVotes);
+  const kickUser = useStore((state) => state.kickUser);
 
   // 優雅地處理載入/空狀態是一個好習慣
   if (!room || !room.users) {
@@ -100,6 +101,8 @@ export function RoomPage() {
                 isHost={user.id === room.owner}
                 votesVisible={room.votesVisible}
                 isHighlighted={room.votesVisible && user.vote !== null && user.vote === highlightValue}
+                isViewerHost={isOwner}
+                onKick={kickUser}
               />
             ))}
           </div>

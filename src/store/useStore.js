@@ -104,6 +104,12 @@ export const useStore = create((set, get) => ({
       set({ room: null, error: data });
     });
 
+    socket.on('kicked', () => {
+      // 該使用者被踢出了，將 room 設為 null
+      console.log('[Socket] You have been kicked');
+      set({ room: null });
+    });
+
     // 手動連線 socket。`autoConnect` 在 `socket.js` 中被設定為 false
     socket.connect();
   },
@@ -192,5 +198,15 @@ export const useStore = create((set, get) => ({
    */
   clearError: () => {
     set({ error: null });
+  },
+
+  /**
+   * `kickUser`: 房主踢出某個使用者
+   */
+  kickUser: (targetSocketId) => {
+    const { room } = get();
+    if (room) {
+      socket.emit('kickUser', { roomId: room.id, targetSocketId });
+    }
   },
 }));

@@ -1,4 +1,4 @@
-import { FiCheck, FiHelpCircle } from 'react-icons/fi';
+import { FiCheck, FiHelpCircle, FiLogOut } from 'react-icons/fi';
 import { FaCrown } from 'react-icons/fa';
 
 /**
@@ -13,8 +13,10 @@ import { FaCrown } from 'react-icons/fa';
  * @param {boolean} props.isHost - 如果此使用者是房主，則為 true
  * @param {boolean} props.votesVisible - 如果投票已被房主揭示，則為 true
  * @param {boolean} props.isHighlighted - 如果此卡片擁有最多票的值，則為 true
+ * @param {boolean} props.isViewerHost - 如果目前觀看者是房主，則為 true
+ * @param {function} props.onKick - 點擊「踢出」按鈕時要呼叫的函數
  */
-export function UserCard({ user, isCurrentUser, isHost = false, votesVisible, isHighlighted = false }) {
+export function UserCard({ user, isCurrentUser, isHost = false, votesVisible, isHighlighted = false, isViewerHost = false, onKick }) {
   // 衍生布林值，用於輕鬆檢查使用者是否已提交投票
   const hasVoted = user.vote !== null;
 
@@ -35,6 +37,22 @@ export function UserCard({ user, isCurrentUser, isHost = false, votesVisible, is
         <div className="absolute top-2 left-2">
           <FaCrown className="text-2xl text-yellow-400 drop-shadow-lg" />
         </div>
+      )}
+
+      {/* 踢出按鈕 - 只在當前使用者是房主且此卡片不是房主自己時顯示 */}
+      {isViewerHost && !isHost && (
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            if (window.confirm(`Are you sure you want to kick ${user.name}?`)) {
+              onKick(user.id);
+            }
+          }}
+          className="absolute top-2 right-2 p-1.5 bg-primary-light/20 hover:bg-primary-light/40 rounded-full hover:scale-110 transition-all z-10 shadow-lg border border-primary-light/30"
+          title="Kick User"
+        >
+          <FiLogOut size={14} className="text-white/70" />
+        </button>
       )}
 
       {/*
