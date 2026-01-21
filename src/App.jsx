@@ -4,6 +4,7 @@ import { LobbyPage } from './pages/LobbyPage';
 import { RoomPage } from './pages/RoomPage';
 import { NavHeader } from './components/NavHeader';
 import { Footer } from './components/Footer';
+import { AdminPage } from './pages/AdminPage';
 
 /**
  * 主應用程式元件 (App.jsx)
@@ -25,6 +26,12 @@ function App() {
    * 這是一種簡單的條件式渲染形式，類似路由器的功能。
    */
   const renderCurrentPage = () => {
+    // 🕵️ 隱藏的管理員路由
+    // 優先檢查此路徑，這樣即使有狀態也能強制進入管理頁面
+    if (window.location.pathname === '/taiwanno1111111111111') {
+      return <AdminPage />;
+    }
+
     // 如果使用者在房間裡，顯示 RoomPage。
     if (room) {
       return <RoomPage />;

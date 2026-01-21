@@ -53,6 +53,11 @@ export const useStore = create((set, get) => ({
    */
   roomList: [],
 
+  /**
+   * `adminData`: 管理員專用資料（所有房間和使用者）
+   */
+  adminData: null,
+
   // =================================================================================================
   // ACTIONS: 動作：元件可以呼叫以與狀態或伺服器互動的函數
   // =================================================================================================
@@ -90,6 +95,11 @@ export const useStore = create((set, get) => ({
     socket.on('roomListUpdated', (roomList) => {
       // 伺服器發送更新的房間列表
       set({ roomList });
+    });
+
+    socket.on('adminDataUpdated', (adminData) => {
+      console.log('[Socket] Admin data updated', adminData);
+      set({ adminData });
     });
 
     socket.on('roomError', (errorData) => {
@@ -208,5 +218,23 @@ export const useStore = create((set, get) => ({
     if (room) {
       socket.emit('kickUser', { roomId: room.id, targetSocketId });
     }
+  },
+
+  // --- 管理員 Actions ---
+
+  fetchAdminData: () => {
+    socket.emit('adminGetData');
+  },
+
+  adminDeleteRoom: (roomId) => {
+    socket.emit('adminDeleteRoom', { roomId });
+  },
+
+  adminDeleteUser: (roomId, userId) => {
+    socket.emit('adminDeleteUser', { roomId, userId });
+  },
+
+  adminNuke: () => {
+    socket.emit('adminNuke');
   },
 }));

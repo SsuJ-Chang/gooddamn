@@ -23,8 +23,12 @@ io.on('connection', (socket) => {
   console.log(`[Connection] User connected: ${socket.id}`);
 
   // 使用者註冊事件：當使用者連線後，他們首先發送他們的名字
+  // 使用者註冊事件：當使用者連線後，他們首先發送他們的名字
   socket.on('register', ({ name }) => {
-    const sanitizedName = name.slice(0, 20);
+    // 🛡️ 保護機制：確保名字存在且為字串，防止 Admin Page 直接連線造成的崩潰
+    const safeName = (name && typeof name === 'string') ? name : 'Guest';
+    const sanitizedName = safeName.slice(0, 20);
+    
     userSocketMap[socket.id] = { name: sanitizedName };
     console.log(`[Register] User ${socket.id} registered as "${sanitizedName}"`);
   });
@@ -168,6 +172,69 @@ io.on('connection', (socket) => {
       console.log(`[Vote] Owner ${socket.id} reset votes in room ${roomId}`);
       io.to(roomId).emit('roomStateUpdated', room);
     }
+  });
+
+
+  // --- 管理員專用事件 ---
+
+  // 取得管理員資料：回傳所有房間和使用者的完整列表
+  socket.on('adminGetData', () => {
+    // 簡單回傳整個 rooms 物件即可，前端再處理顯示
+    socket.emit('adminDataUpdated', rooms);
+  });
+
+  // 管理員刪除房間
+  socket.on('adminDeleteRoom', ({ roomId }) => {
+    if (rooms[roomId]) {
+      console.log(`[Admin] Deleting room ${roomId}`);
+      io.to(roomId).emit('roomError', { message: 'This room has been closed by RJ.' });
+      io.to(roomId).emit('roomExpired', { message: 'Admin closed the room.' }); // 確保前端清除狀態
+      delete rooms[roomId];
+      io.emit('roomListUpdated', getRoomListPayload());
+      // 更新管理員介面
+      io.emit('adminDataUpdated', rooms);
+    }
+  });
+
+  // 管理員踢除使用者
+  socket.on('adminDeleteUser', ({ roomId, userId }) => {
+    const room = rooms[roomId];
+    if (room && room.users[userId]) {
+      const targetSocket = io.sockets.sockets.get(userId);
+      console.log(`[Admin] Kicking user ${userId} from room ${roomId}`);
+      
+      if (targetSocket) {
+        targetSocket.emit('roomError', { message: 'You have been removed by RJ.' });
+        targetSocket.emit('kicked');
+        leaveRoom(roomId, targetSocket);
+      } else {
+        // 如果 socket 已經斷線但在房間資料中還在（邊緣情況），手動清理
+        delete room.users[userId];
+        if (Object.keys(room.users).length === 0) {
+          delete rooms[roomId];
+        } else if (room.owner === userId) {
+             // 轉移房主邏輯簡化版：直接給下一個人
+             room.owner = Object.keys(room.users)[0];
+        }
+         io.to(roomId).emit('roomStateUpdated', room);
+      }
+      // 更新管理員介面
+      io.emit('adminDataUpdated', rooms);
+    }
+  });
+
+  // 核彈按鈕：刪除所有房間
+  socket.on('adminNuke', () => {
+    console.log(`[Admin] NUKING ALL ROOMS`);
+    Object.keys(rooms).forEach(roomId => {
+        io.to(roomId).emit('roomError', { message: 'Server reset by administrator.' });
+        io.to(roomId).emit('roomExpired', { message: 'Server reset.' });
+    });
+    // 清空物件
+    for (const key in rooms) delete rooms[key];
+    
+    io.emit('roomListUpdated', getRoomListPayload());
+    io.emit('adminDataUpdated', rooms);
   });
 
   // 斷線事件：使用者的連線中斷
