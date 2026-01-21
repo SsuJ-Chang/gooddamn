@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useStore } from '../store/useStore';
+import { Toast } from '../components/Toast';
 
 /**
  * 大廳頁面元件
@@ -18,100 +19,103 @@ export function LobbyPage() {
   const joinRoom = useStore((state) => state.joinRoom);
   const getRoomList = useStore((state) => state.getRoomList);
   const error = useStore((state) => state.error);
+  const clearError = useStore((state) => state.clearError);
 
   // 在元件載入時取得房間列表。
   useEffect(() => {
     getRoomList();
   }, [getRoomList]);
 
-  // Debug: 監控 error 狀態變化
-  useEffect(() => {
-    console.log('[LobbyPage] error state changed:', error);
-  }, [error]);
-
+  // 取得錯誤訊息文字
+  const errorMessage = error ? (typeof error === 'string' ? error : (error.message || 'An error occurred')) : null;
 
 
   return (
-    <div className="flex flex-1 flex-col items-center justify-center bg-bg-primary py-8">
-      {/* 響應式容器：手機版減少 padding */}
-      <div className="rounded-lg bg-bg-secondary p-6 sm:p-8 shadow-2xl w-full max-w-lg border border-bg-tertiary">
-        {/* 響應式標題：手機版較小字體 */}
-        <h1 className="mb-2 text-center text-2xl sm:text-3xl font-bold text-text-primary">Lobby</h1>
-        <p className="mb-8 text-center text-base sm:text-lg text-text-secondary">
-          Welcome, <span className="font-bold text-primary">{name}</span>! Let's Gooddamn!
-        </p>
+    <>
+      {/* Toast 通知 - 覆蓋在畫面上 */}
+      {errorMessage && (
+        <Toast
+          message={errorMessage}
+          type="error"
+          onClose={clearError}
+        />
+      )}
 
-        {/* 錯誤訊息顯示 */}
-        {error && (
-          <div className="mb-6 p-4 rounded-md bg-red-500/20 border border-red-500/50 text-red-300 text-center">
-            ⚠️ {typeof error === 'string' ? error : (error.message || '發生錯誤，請稍後再試')}
-          </div>
-        )}
+      <div className="flex flex-1 flex-col items-center justify-center bg-bg-primary py-8">
+        {/* 響應式容器：手機版減少 padding */}
+        <div className="rounded-lg bg-bg-secondary p-6 sm:p-8 shadow-2xl w-full max-w-lg border border-bg-tertiary">
+          {/* 響應式標題：手機版較小字體 */}
+          <h1 className="mb-2 text-center text-2xl sm:text-3xl font-bold text-text-primary">Lobby</h1>
+          <p className="mb-8 text-center text-base sm:text-lg text-text-secondary">
+            Welcome, <span className="font-bold text-primary">{name}</span>! Let's Gooddamn!
+          </p>
 
-        {/* 建立房間區塊 */}
-        <div className="mb-8">
-          {/* 響應式次標題 */}
-          <h2 className="mb-4 text-lg sm:text-xl font-semibold text-text-primary">Create a New Room</h2>
-          <form
-            onSubmit={(e) => {
-              e.preventDefault();
-              const roomNameInput = document.getElementById('room-name-input');
-              const roomName = roomNameInput.value.trim() || `${name}'s Room`;
-              createRoom(roomName);
-            }}
-            className="flex flex-col gap-4"
-          >
-            {/* 響應式輸入框 */}
-            <input
-              type="text"
-              placeholder="Enter Room Name (Optional)"
-              className="rounded-md border-2 border-bg-tertiary bg-bg-tertiary px-4 py-2.5 sm:py-3 text-lg text-text-primary placeholder-text-muted focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary"
-              id="room-name-input"
-            />
-            {/* 響應式按鈕 */}
-            <button
-              type="submit"
-              className="w-full rounded-md bg-primary px-4 py-2.5 sm:py-3 text-lg font-bold text-white shadow-lg transition-transform hover:scale-105 hover:bg-primary-light focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-bg-secondary"
+          {/* 建立房間區塊 */}
+          <div className="mb-8">
+            {/* 響應式次標題 */}
+            <h2 className="mb-4 text-lg sm:text-xl font-semibold text-text-primary">Create a New Room</h2>
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                const roomNameInput = document.getElementById('room-name-input');
+                const roomName = roomNameInput.value.trim() || `${name}'s Room`;
+                createRoom(roomName);
+              }}
+              className="flex flex-col gap-4"
             >
-              Create Room
-            </button>
-          </form>
-        </div>
+              {/* 響應式輸入框 */}
+              <input
+                type="text"
+                placeholder="Enter Room Name (Optional)"
+                className="rounded-md border-2 border-bg-tertiary bg-bg-tertiary px-4 py-2.5 sm:py-3 text-lg text-text-primary placeholder-text-muted focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary"
+                id="room-name-input"
+              />
+              {/* 響應式按鈕 */}
+              <button
+                type="submit"
+                className="w-full rounded-md bg-primary px-4 py-2.5 sm:py-3 text-lg font-bold text-white shadow-lg transition-transform hover:scale-105 hover:bg-primary-light focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-bg-secondary"
+              >
+                Create Room
+              </button>
+            </form>
+          </div>
 
-        {/* 可用房間列表區塊 */}
-        <div className="mb-8">
-          {/* 響應式次標題 */}
-          <h2 className="mb-4 text-lg sm:text-xl font-semibold text-text-primary">Rooms</h2>
-          {roomList.length === 0 ? (
-            <p className="text-center text-text-muted">No rooms available. Create one!</p>
-          ) : (
-            <div className="flex flex-col gap-2 max-h-60 overflow-y-auto pr-2 custom-scrollbar">
-              {roomList.map((room) => (
-                <div
-                  key={room.id}
-                  className="flex items-center justify-between rounded-md bg-bg-tertiary px-3 py-2 shadow-md transition-colors hover:bg-bg-card-hover"
-                >
-                  <h3 className="font-bold text-text-primary">
-                    {room.name} <span className="font-normal text-text-muted">({room.userCount}/{room.maxUsers})</span>
-                  </h3>
-                  <button
-                    onClick={() => joinRoom(room.id)}
-                    className="rounded-md bg-primary px-3 py-1 text-sm font-bold text-white shadow-sm transition-transform hover:scale-105 hover:bg-primary-light focus:outline-none focus:ring-2 focus:ring-primary"
-                    disabled={room.userCount >= room.maxUsers}
+          {/* 可用房間列表區塊 */}
+          <div className="mb-8">
+            {/* 響應式次標題 */}
+            <h2 className="mb-4 text-lg sm:text-xl font-semibold text-text-primary">Rooms</h2>
+            {roomList.length === 0 ? (
+              <p className="text-center text-text-muted">No rooms available. Create one!</p>
+            ) : (
+              <div className="flex flex-col gap-2 max-h-60 overflow-y-auto pr-2 custom-scrollbar">
+                {roomList.map((room) => (
+                  <div
+                    key={room.id}
+                    className="flex items-center justify-between rounded-md bg-bg-tertiary px-3 py-2 shadow-md transition-colors hover:bg-bg-card-hover"
                   >
-                    {room.userCount >= room.maxUsers ? 'Full' : 'Join'}
-                  </button>
-                </div>
-              ))}
-            </div>
-          )}
+                    <h3 className="font-bold text-text-primary">
+                      {room.name} <span className="font-normal text-text-muted">({room.userCount}/{room.maxUsers})</span>
+                    </h3>
+                    <button
+                      onClick={() => joinRoom(room.id)}
+                      className="rounded-md bg-primary px-3 py-1 text-sm font-bold text-white shadow-sm transition-transform hover:scale-105 hover:bg-primary-light focus:outline-none focus:ring-2 focus:ring-primary"
+                      disabled={room.userCount >= room.maxUsers}
+                    >
+                      {room.userCount >= room.maxUsers ? 'Full' : 'Join'}
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+
+          {/*
+            錯誤顯示已移到 Toast 元件
+          */}
         </div>
-
-
-        {/*
-          錯誤顯示已移到頂部
-        */}
       </div>
-    </div>
+    </>
   );
 }
+

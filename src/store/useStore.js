@@ -186,4 +186,11 @@ export const useStore = create((set, get) => ({
   getRoomList: () => {
     socket.emit('getRoomList');
   },
+
+  /**
+   * `clearError`: 清除錯誤訊息
+   */
+  clearError: () => {
+    set({ error: null });
+  },
 }));
