@@ -83,6 +83,7 @@ export const useStore = create((set, get) => ({
       // 這是最重要的事件。伺服器在房間狀態變化時發送此事件。
       // （例如，使用者加入、離開、投票或投票被揭示）。
       // 我們用來自伺服器的新資料更新本地 `room` 狀態。
+      // 成功進入房間時才清除錯誤
       set({ room: roomData, error: null });
     });
 
@@ -91,9 +92,10 @@ export const useStore = create((set, get) => ({
       set({ roomList });
     });
 
-    socket.on('error', (errorMessage) => {
+    socket.on('roomError', (errorData) => {
       // 伺服器發送了一個錯誤。我們儲存它以便 UI 可以顯示它。
-      set({ error: errorMessage });
+      console.log('[Socket] Received roomError:', errorData);
+      set({ error: errorData });
     });
 
     // 手動連線 socket。`autoConnect` 在 `socket.js` 中被設定為 false

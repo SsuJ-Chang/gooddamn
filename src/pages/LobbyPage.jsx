@@ -24,6 +24,11 @@ export function LobbyPage() {
     getRoomList();
   }, [getRoomList]);
 
+  // Debug: 監控 error 狀態變化
+  useEffect(() => {
+    console.log('[LobbyPage] error state changed:', error);
+  }, [error]);
+
 
 
   return (
@@ -35,6 +40,13 @@ export function LobbyPage() {
         <p className="mb-8 text-center text-base sm:text-lg text-text-secondary">
           Welcome, <span className="font-bold text-primary">{name}</span>! Let's Gooddamn!
         </p>
+
+        {/* 錯誤訊息顯示 */}
+        {error && (
+          <div className="mb-6 p-4 rounded-md bg-red-500/20 border border-red-500/50 text-red-300 text-center">
+            ⚠️ {typeof error === 'string' ? error : (error.message || '發生錯誤，請稍後再試')}
+          </div>
+        )}
 
         {/* 建立房間區塊 */}
         <div className="mb-8">
@@ -100,12 +112,8 @@ export function LobbyPage() {
 
 
         {/*
-          錯誤顯示：如果 `error` 狀態不為 null，表示伺服器發送了錯誤
-          （例如，房間未找到），我們將向使用者顯示它。
+          錯誤顯示已移到頂部
         */}
-        {error && (
-          <p className="mt-4 text-center text-red-400">{error}</p>
-        )}
       </div>
     </div>
   );

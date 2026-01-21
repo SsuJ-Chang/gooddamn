@@ -44,6 +44,16 @@ io.on('connection', (socket) => {
 
   // 建立房間事件：使用者想要建立一個新的 poker 房間
   socket.on('createRoom', ({ roomName, maxUsers }) => {
+    // 🛡️ 保護機制：限制最大房間數量
+    const MAX_ROOMS = 30;
+    const currentRoomCount = Object.keys(rooms).length;
+    
+    if (currentRoomCount >= MAX_ROOMS) {
+      console.log(`[Error] Room limit reached (${MAX_ROOMS}). User ${socket.id} cannot create room.`);
+      socket.emit('roomError', { message: `Room limit reached (${MAX_ROOMS}). Please try again later or join an existing room.` });
+      return;
+    }
+
     const roomId = uuidv4();
     const sanitizedRoomName = roomName.slice(0, 20);
     const ownerId = socket.id;
@@ -71,7 +81,7 @@ io.on('connection', (socket) => {
       votingPattern: 'fibonacci',
     };
 
-    console.log(`[Room] User ${socket.id} created room "${finalRoomName}" (ID: ${roomId})`);
+    console.log(`[Room] User ${socket.id} created room "${finalRoomName}" (ID: ${roomId}) [${currentRoomCount + 1}/${MAX_ROOMS}]`);
     const joined = joinRoom(roomId, socket);
 
     if (!joined) {
