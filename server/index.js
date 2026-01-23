@@ -30,7 +30,7 @@ io.on('connection', (socket) => {
     const sanitizedName = safeName.slice(0, 20);
     
     userSocketMap[socket.id] = { name: sanitizedName };
-    console.log(`[Register] User ${socket.id} registered as "${sanitizedName}"`);
+    console.log(`[Register] User ${socket.id} registered as "${sanitizedName}" (original: "${name}")`);
   });
 
   // 獲取房間列表事件：使用者請求查看所有可用的房間
@@ -271,7 +271,8 @@ function joinRoom(roomId, socket) {
     return true;
   } else {
     // 處理錯誤：房間已滿或使用者未註冊
-    console.log(`[Error] User ${socket.id} failed to join room ${roomId}. Room full or user not registered.`);
+    const errorReason = !room ? 'Room not found' : !user ? 'User not registered in userSocketMap' : 'Room full';
+    console.log(`[Error] User ${socket.id} failed to join room ${roomId}. Reason: ${errorReason}. userSocketMap has name: ${!!user}`);
     return false;
   }
 }

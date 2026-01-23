@@ -74,9 +74,11 @@ export const useStore = create((set, get) => ({
 
     socket.on('connect', () => {
       // 成功連線時，更新我們的狀態
+      const currentName = get().name;
+      console.log('[Socket] Connected. Socket ID:', socket.id, '| Registering with name:', currentName);
       set({ isConnected: true, clientId: socket.id });
       // 向伺服器註冊使用者
-      socket.emit('register', { name: get().name });
+      socket.emit('register', { name: currentName });
     });
 
     socket.on('disconnect', () => {
