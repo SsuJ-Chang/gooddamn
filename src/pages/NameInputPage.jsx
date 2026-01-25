@@ -187,9 +187,6 @@ export function NameInputPage() {
               : (isJoinMode ? 'Join' : 'Create Room')
             }
           </button>
-
-          {/* 如果是加入模式，提供返回首頁的按鈕 */}
-
         </form>
       </div>
     </div>
