@@ -184,7 +184,7 @@ export function NameInputPage() {
           >
             {isLoading
               ? (isJoinMode ? 'Joining...' : 'Creating...')
-              : (isJoinMode ? 'Join Room' : 'Create Room')
+              : (isJoinMode ? 'Join' : 'Create Room')
             }
           </button>
 
