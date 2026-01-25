@@ -4,7 +4,7 @@
 
 ---
 
-A real-time, clean, and beautiful Scrum Planning Poker application that makes remote agile estimation easy for teams.
+A real-time, clean, and beautiful tool for easy agile estimation.
 
 ![Planning Poker](https://img.shields.io/badge/Planning-Poker-orange)
 ![React](https://img.shields.io/badge/React-18-blue)
@@ -13,74 +13,64 @@ A real-time, clean, and beautiful Scrum Planning Poker application that makes re
 ## ✨ Features
 
 ### Core Functionality
-- 🎯 **Real-time Voting System** - All votes synchronized instantly
-- 👥 **Multi-user Collaboration** - Support multiple rooms running simultaneously
-- 🎨 **Custom Room Names** - Auto-numbering for duplicate names (Room - 2, Room - 3...)
-- 🔄 **Quick Reset** - Start new estimation rounds with one click
+- 🎯 **Real-time Voting** - Instant synchronization of all voting statuses.
+- 🔗 **Direct URL Sharing** - Join rooms directly via URL; no more manual searching.
+- 📱 **QR Code Access** - Built-in QR Code generator for quick mobile joins.
+- 🎨 **Custom Room Names** - Smart auto-numbering for duplicate names (Room - 2, Room - 3...).
+- 🧹 **Auto Cleanup** - Expired or empty rooms are automatically detected and deleted.
+
+### Host Controls
+- 👁️ **Reveal Votes** - The host controls when to show the results to ensure a fair process.
+- 🔄 **New Round** - Reset everyone's vote with one click to start the next task.
+- 🛡️ **Member Management** - Remove intruders or inactive users with a simple click.
+- 🚫 **Smart Banning** - Kicked users are temporarily restricted from re-entering the room.
 
 ### UI/UX Enhancements
-- 🌟 **Golden Highlight** - Auto-highlight most voted option on Reveal (no highlight on ties)
-- 💫 **Shake Animation** - Highlighted cards feature gentle shake effect
-- 🎴 **Optimized Card Design** - Clear display of names and voting information
-- 📱 **Responsive Layout** - Perfect support for all screen sizes
-- 🌑 **Dark Theme** - Eye-friendly and professional visual design
-
-### Smart Features
-- 🏠 **Room List** - Real-time display of all available rooms
-- 🧹 **Auto Cleanup** - Empty rooms automatically deleted to keep system clean
-- 🎲 **Fibonacci Sequence** - Standard agile estimation options (1, 2, 3, 5, 8, 13, 20, ?)
+- ⏳ **Seamless Loading** - Global loading indicators for smooth state transitions.
+- 🌟 **Golden Consensus** - Automatically highlights the most voted value after reveal.
+- 🌑 **Sleek Dark Mode** - Professional and eye-friendly visual design.
+- 📱 **Fully Responsive** - Consistent experience across mobile, tablet, and desktop.
 
 ## 🛠️ Tech Stack
 
 ### Frontend
-- **React 18** - Modern UI framework
-- **Zustand** - Lightweight state management
-- **Tailwind CSS 4.0** - CSS-first configuration for rapid styling
-- **Socket.IO Client** - Real-time bidirectional communication
-- **Vite** - Lightning-fast development experience
+- **React 18** + **React Router** - Modern navigation and UI framework
+- **Zustand** - High-performance state management
+- **Tailwind CSS 4.0** - Optimized dark-theme styles
+- **Socket.IO Client** - Real-time communication
 
 ### Backend
-- **Node.js** - JavaScript runtime environment
-- **Express** - Minimalist web framework
-- **Socket.IO** - WebSocket real-time communication
-- **UUID** - Unique room ID generation
+- **Node.js** + **Express** - Lightweight backend engine
+- **Socket.IO** - Bidirectional WebSocket communication
+- **UUID** - Secure unique identifier generation
 
 ## 📖 Usage Guide
 
-1. **Enter Name** - Input your name on first visit
-2. **Enter Lobby** - View available rooms or create a new one
-3. **Start Estimation** - Select your points and wait for other members
-4. **Reveal** - Room owner can show/hide all votes
-5. **Reset** - Start next round after completion
+### 1. Create a Room
+Enter your name and a room name on the home page, then click "Create Room".
+
+### 2. Invite Members
+Share your room in two ways:
+*   **Copy Link**: Click the "Link icon" in the navigation bar.
+*   **QR Code**: Click the "QR Code icon" to show a scannable code.
+
+### 3. Hosting a Session
+*   Members join and cast their votes.
+*   Click **Reveal Votes** to show the consensus.
+*   Click **New Round** to clear votes for the next item.
+*   If needed, click the **X** on any user card to remove them.
 
 ## 🎯 Project Structure
 
 ```
 gooddamn/
 ├── src/                    # Frontend source code
-│   ├── components/         # React components
-│   ├── pages/             # Page components
-│   ├── store/             # Zustand state management
-│   └── lib/               # Utils and configuration
-├── server/                # Backend source code
-│   └── index.js           # Express + Socket.IO server
+│   ├── components/         # Reusable components (Header, Toast, Modals)
+│   ├── pages/             # Route pages and guard logic
+│   └── store/             # State logic and Socket event hub
+├── server/                # Backend Node.js code
 └── public/                # Static assets
 ```
-
-## 🎨 Feature Showcase
-
-### Golden Highlight for Most Votes
-When votes are revealed, the option with the most votes is automatically highlighted with a golden gradient, helping teams reach consensus quickly.
-
-**Highlight Rules:**
-- ✅ Clear majority: Highlighted in gold with shake
-- ⚠️ Tied votes: No highlight (avoid misleading)
-- 📊 All same: No highlight
-- 👤 Single vote: No highlight
-
-### Smart Room Name Numbering
-Duplicate room names are automatically numbered, making it easy for teams to create multiple rooms for similar purposes:
-- `Daily Standup` → `Daily Standup - 2` → `Daily Standup - 3`
 
 ## 👨‍💻 Author
 
