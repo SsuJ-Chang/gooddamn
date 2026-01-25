@@ -1,9 +1,16 @@
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useStore } from '../store/useStore';
 import { Header } from '../components/Header';
 import { UserCard } from '../components/UserCard';
 import { VotingPanel } from '../components/VotingPanel';
 import { RoomControls } from '../components/RoomControls';
 import { VoteResults } from '../components/VoteResults';
+import { QRCodeModal } from '../components/QRCodeModal';
+import { Toast } from '../components/Toast';
+import { Loading } from '../components/Loading';
+import confetti from 'canvas-confetti';
+
 
 /**
  * 房間頁面元件
@@ -14,6 +21,7 @@ import { VoteResults } from '../components/VoteResults';
  * 這種模式有助於保持程式碼組織良好。
  */
 export function RoomPage() {
+  const navigate = useNavigate();
   // 從 store 選擇此頁面及其子元件所需的所有狀態和 actions
   const room = useStore((state) => state.room);
   const clientId = useStore((state) => state.clientId);
@@ -23,13 +31,28 @@ export function RoomPage() {
   const resetVotes = useStore((state) => state.resetVotes);
   const kickUser = useStore((state) => state.kickUser);
 
+  // 本地狀態用於 QR Code 彈窗和 Toast
+  const [isQRModalOpen, setIsQRModalOpen] = useState(false);
+  const [showCopyToast, setShowCopyToast] = useState(false);
+
+
+
+  // 監聽投票揭示狀態，觸發 Confetti
+  // (暫時移除以排除 Crash 原因)
+  /*
+  useEffect(() => {
+    if (room?.votesVisible) {
+      // Logic...
+    }
+  }, [room?.votesVisible, room?.users]); 
+  */
+
+  // 生成房間 URL
+  const roomUrl = typeof window !== 'undefined' ? `${window.location.origin}/room/${room?.id}` : '';
+
   // 優雅地處理載入/空狀態是一個好習慣
   if (!room || !room.users) {
-    return (
-      <div className="flex h-screen items-center justify-center text-xl">
-        Loading room...
-      </div>
-    );
+    return <Loading message="Loading room..." />;
   }
 
   // 衍生狀態：從基礎狀態計算元件所需的值
@@ -74,6 +97,23 @@ export function RoomPage() {
 
   const highlightValue = calculateMostVotedValue();
 
+  // 複製連結功能
+  const handleCopyLink = async () => {
+    try {
+      await navigator.clipboard.writeText(roomUrl);
+      setShowCopyToast(true);
+      setTimeout(() => setShowCopyToast(false), 3000);
+    } catch (err) {
+      console.error('Failed to copy:', err);
+    }
+  };
+
+  // 處理離開房間並跳轉回首頁
+  const handleLeave = () => {
+    leaveRoom();
+    navigate('/');
+  };
+
   return (
     // 主要容器：使用 flex 垂直置中，避免不必要的 scrollbar
     <div className="flex-1 bg-bg-primary flex flex-col overflow-hidden">
@@ -86,7 +126,10 @@ export function RoomPage() {
             userCount={users.length}
             votedCount={votedCount}
             expiresAt={room.expiresAt}
-            onLeave={leaveRoom}
+            onLeave={handleLeave}
+            isOwner={isOwner}
+            onCopyLink={handleCopyLink}
+            onShowQR={() => setIsQRModalOpen(true)}
           />
 
           {/* 2. 使用者卡片的主要內容區域 - 響應式顯示 */}
@@ -127,11 +170,28 @@ export function RoomPage() {
                 onShowVotes={showVotes}
                 onResetVotes={resetVotes}
                 votesVisible={room.votesVisible}
+                hasVotes={votedCount > 0}
               />
             )}
           </div>
         </div>
       </div>
+
+      {/* QR Code 彈窗 */}
+      <QRCodeModal
+        isOpen={isQRModalOpen}
+        onClose={() => setIsQRModalOpen(false)}
+        roomUrl={roomUrl}
+      />
+
+      {/* 複製成功 Toast */}
+      {showCopyToast && (
+        <Toast
+          message="Link copied to clipboard!"
+          type="success"
+          onClose={() => setShowCopyToast(false)}
+        />
+      )}
     </div>
   );
 }

@@ -67,6 +67,16 @@ body {
   /* primary-light */
 }
 
+/* Fix for Chrome/Safari Input Autofill making background white */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0 30px #1e2b2e inset !important;
+  -webkit-text-fill-color: #e0e6e6 !important;
+  caret-color: #e0e6e6 !important;
+}
+
 /* Shake animation for highlighted vote cards */
 @keyframes gentle-shake {
 

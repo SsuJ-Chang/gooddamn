@@ -1,48 +1,65 @@
 import { useState, useEffect } from 'react';
 import { useStore } from '../store/useStore';
-import { FiTrash2, FiRefreshCw, FiAlertTriangle, FiZap } from 'react-icons/fi';
+import { Link } from 'react-router-dom';
+import { NavHeader } from '../components/NavHeader';
+import { FiTrash2, FiRefreshCw, FiAlertTriangle, FiZap, FiHome, FiUsers } from 'react-icons/fi';
 
-/**
- * 隱藏的管理員儀表板
- * 路徑: /taiwanno1111111111111
- */
 export function AdminPage() {
+  // 1. Store Hooks (Top Level)
+  const adminData = useStore((state) => state.adminData);
   const fetchAdminData = useStore((state) => state.fetchAdminData);
+  const deleteRoom = useStore((state) => state.adminDeleteRoom);
+  const deleteUser = useStore((state) => state.adminDeleteUser);
+  const nukeRooms = useStore((state) => state.adminNuke);
+
+  const isAuthenticated = useStore((state) => state.adminIsAuthenticated);
+  const authenticate = useStore((state) => state.adminAuth);
+
   const connect = useStore((state) => state.connect);
   const isConnected = useStore((state) => state.isConnected);
-  const adminData = useStore((state) => state.adminData);
-  const adminDeleteRoom = useStore((state) => state.adminDeleteRoom);
-  const adminDeleteUser = useStore((state) => state.adminDeleteUser);
-  const adminNuke = useStore((state) => state.adminNuke);
 
+  // 2. Local State Hooks (Must be Top Level)
+  const [password, setPassword] = useState('');
+  const [errorMsg, setErrorMsg] = useState('');
+
+  // 這些原本被放在 conditional return 之後，導致了 Crash
   const [selectedRooms, setSelectedRooms] = useState(new Set());
-  const [selectedUsers, setSelectedUsers] = useState(new Set()); // Format: "roomId:userId"
+  const [selectedUsers, setSelectedUsers] = useState(new Set());
+
+  // 3. Effects (Top Level)
+  // 處理登入提交
+  const handleLogin = (e) => {
+    e.preventDefault();
+    authenticate(password);
+    setTimeout(() => {
+      if (!useStore.getState().adminIsAuthenticated) {
+        setErrorMsg('Invalid Password');
+      }
+    }, 1000);
+  };
 
   useEffect(() => {
-    // 確保 socket 已連線
     if (!isConnected) {
       connect();
     }
-    fetchAdminData();
-    // 設置定時重整以防 Socket 漏接
-    const interval = setInterval(fetchAdminData, 5000);
-    return () => clearInterval(interval);
-  }, [fetchAdminData, connect, isConnected]);
+    if (isAuthenticated) {
+      fetchAdminData();
+      const interval = setInterval(fetchAdminData, 3000);
+      return () => clearInterval(interval);
+    }
+  }, [fetchAdminData, isAuthenticated, isConnected, connect]);
 
-  // 處理房間勾選
+  // 4. Helper Functions
   const toggleRoom = (roomId) => {
     const newSelected = new Set(selectedRooms);
     if (newSelected.has(roomId)) {
       newSelected.delete(roomId);
-      // 取消選取房間時，也取消選取該房間的所有使用者
-      // (雖然邏輯上刪除房間就會刪除使用者，但為了 UI 一致性)
     } else {
       newSelected.add(roomId);
     }
     setSelectedRooms(newSelected);
   };
 
-  // 處理使用者勾選
   const toggleUser = (roomId, userId) => {
     const key = `${roomId}:${userId}`;
     const newSelected = new Set(selectedUsers);
@@ -54,25 +71,20 @@ export function AdminPage() {
     setSelectedUsers(newSelected);
   };
 
-  // 執行選取刪除
   const handleDestroySelected = () => {
     if (!window.confirm(`Are you sure you want to destroy ${selectedRooms.size} rooms and ${selectedUsers.size} users?`)) return;
 
-    // 刪除選取的房間
     selectedRooms.forEach(roomId => {
-      adminDeleteRoom(roomId);
+      deleteRoom(roomId);
     });
 
-    // 刪除選取的使用者
     selectedUsers.forEach(key => {
       const [roomId, userId] = key.split(':');
-      // 如果房間已經被選取要刪除，就不需要單獨刪除使用者了
       if (!selectedRooms.has(roomId)) {
-        adminDeleteUser(roomId, userId);
+        deleteUser(roomId, userId);
       }
     });
 
-    // 清空選取
     setSelectedRooms(new Set());
     setSelectedUsers(new Set());
   };
@@ -80,44 +92,93 @@ export function AdminPage() {
   const handleNuke = () => {
     if (window.confirm('WARNING: THIS WILL DELETE ALL ROOMS AND KICK ALL USERS. ARE YOU SURE?')) {
       if (window.confirm('DOUBLE CHECK: This action cannot be undone.')) {
-        adminNuke();
+        nukeRooms();
       }
     }
   };
 
+  // 5. Conditional Rendering
+  // 如果未認證，回傳登入 UI
+  if (!isAuthenticated) {
+    return (
+      <div className="min-h-screen bg-bg-primary text-text-primary font-sans flex items-center justify-center p-4">
+        <div className="bg-bg-secondary p-8 rounded-2xl shadow-2xl border border-white/5 w-full max-w-md">
+          <h1 className="text-2xl font-bold mb-6 text-center">Be GOD</h1>
+          <form onSubmit={handleLogin} className="space-y-4">
+            <input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="Password"
+              className="w-full bg-bg-tertiary border border-white/10 rounded px-4 py-2 focus:outline-none focus:border-primary transition-colors text-center font-mono text-lg text-white"
+              autoFocus
+            />
+            {errorMsg && <p className="text-red-400 text-sm text-center">{errorMsg}</p>}
+            <button
+              type="submit"
+              className="w-full bg-primary hover:bg-primary-light text-white font-bold py-2 px-4 rounded transition-all active:scale-95"
+            >
+              Go
+            </button>
+          </form>
+
+        </div>
+      </div>
+    );
+  }
+
+  // 如果已認證但資料未載入
   if (!adminData) return <div className="p-8 text-center bg-bg-primary min-h-screen text-text-primary">Loading Admin Data...</div>;
 
   const roomIds = Object.keys(adminData);
+  const totalUsers = roomIds.reduce((sum, id) => sum + Object.keys(adminData[id].users || {}).length, 0);
 
+  // 認證後的 Dashboard UI
   return (
-    <div className="min-h-screen bg-bg-primary p-4 sm:p-8 text-text-primary">
-      <div className="max-w-6xl mx-auto">
-        <header className="flex flex-col sm:flex-row items-center justify-between mb-8 gap-4">
-          <h1 className="text-3xl font-bold flex items-center gap-2">
-            <FiZap className="text-yellow-400 animate-pulse" /> GOD MODE
-          </h1>
-          <div className="flex gap-2">
-            <button
-              onClick={fetchAdminData}
-              className="p-2 rounded bg-bg-tertiary hover:bg-bg-card-hover transition-colors"
-            >
-              <FiRefreshCw />
-            </button>
-            <button
-              onClick={handleDestroySelected}
-              disabled={selectedRooms.size === 0 && selectedUsers.size === 0}
-              className="px-4 py-2 bg-red-600 text-white rounded font-bold hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
-            >
-              <FiTrash2 /> DESTROY Selected
-            </button>
-            <button
-              onClick={handleNuke}
-              className="px-4 py-2 bg-red-800 text-white rounded font-bold hover:bg-red-900 border-2 border-red-500 animate-pulse flex items-center gap-2"
-            >
-              <FiAlertTriangle /> BOOM!
-            </button>
+    <div className="min-h-screen bg-bg-primary text-text-primary font-sans p-4 sm:p-8">
+      <NavHeader />
+      <div className="max-w-6xl mx-auto pt-20">
+        <div className="flex justify-between items-center mb-6">
+          <h1 className="text-3xl font-bold text-red-400 flex items-center gap-2">🔥 God Mode</h1>
+
+          <div className="flex items-center gap-6 text-text-muted">
+            <div className="flex items-center gap-2" title={`Rooms: ${roomIds.length}/30`}>
+              <FiHome className="text-xl" />
+              <span className="font-mono text-sm">({roomIds.length}/30)</span>
+            </div>
+            <div className="flex items-center gap-2" title={`Users: ${totalUsers}/300`}>
+              <FiUsers className="text-xl" />
+              <span className="font-mono text-sm">({totalUsers}/300)</span>
+            </div>
           </div>
-        </header>
+        </div>
+
+        <div className="flex flex-wrap items-center gap-3 mb-8 p-4 bg-bg-secondary/50 rounded-xl border border-white/5">
+          <button
+            onClick={fetchAdminData}
+            className="p-2.5 rounded bg-bg-tertiary hover:bg-bg-card-hover transition-colors text-xl"
+            title="Refresh Data"
+          >
+            <FiRefreshCw />
+          </button>
+
+          <button
+            onClick={handleDestroySelected}
+            disabled={selectedRooms.size === 0 && selectedUsers.size === 0}
+            className="px-6 py-2 bg-red-600 text-white rounded font-bold hover:bg-red-700 disabled:opacity-30 disabled:cursor-not-allowed flex items-center gap-2 transition-all"
+          >
+            <FiTrash2 /> Kick!
+          </button>
+
+          <div className="flex-1" />
+
+          <button
+            onClick={handleNuke}
+            className="px-6 py-2 bg-red-800 hover:bg-red-900 border border-red-500 text-white rounded font-bold shadow-lg transition-all flex items-center gap-2 active:scale-95"
+          >
+            <span>☢️ BOOM!</span>
+          </button>
+        </div>
 
         <div className="grid grid-cols-1 gap-6">
           {roomIds.length === 0 ? (
@@ -150,10 +211,11 @@ export function AdminPage() {
                     </div>
                     {/* Individual Room Actions */}
                     <button
-                      onClick={() => { if (window.confirm('Delete this room?')) adminDeleteRoom(roomId); }}
-                      className="text-red-400 hover:text-red-300 px-3 py-1 border border-red-400/30 rounded"
+                      onClick={() => { if (window.confirm('Delete this room?')) deleteRoom(roomId); }}
+                      className="text-red-400 hover:text-red-300 p-2 hover:bg-red-400/10 rounded-full transition-colors"
+                      title="Delete Room"
                     >
-                      Delete Room
+                      <FiTrash2 size={20} />
                     </button>
                   </div>
 
@@ -178,7 +240,7 @@ export function AdminPage() {
                             <div className="text-xs text-text-muted truncate">{userId}</div>
                           </div>
                           <button
-                            onClick={() => { if (window.confirm(`Kick ${user.name}?`)) adminDeleteUser(roomId, userId); }}
+                            onClick={() => { if (window.confirm(`Kick ${user.name}?`)) deleteUser(roomId, userId); }}
                             className="text-red-400 hover:text-red-300 p-1"
                             title="Kick"
                           >

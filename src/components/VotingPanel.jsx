@@ -1,3 +1,4 @@
+import React, { memo } from 'react';
 import { FaCheck } from 'react-icons/fa';
 
 /**
@@ -26,7 +27,7 @@ export function VotingPanel({ currentUserVote, onVote, disabled }) {
         return (
           <button
             key={value}
-            onClick={() => onVote(value)}
+            onClick={() => onVote(currentUserVote === value ? null : value)}
             disabled={disabled}
             className={`
               relative
@@ -54,4 +55,5 @@ export function VotingPanel({ currentUserVote, onVote, disabled }) {
     </div>
   );
 }
+
 

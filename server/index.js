@@ -1,9 +1,8 @@
-
 const express = require('express');
 const http = require('http');
 const { Server } = require('socket.io');
 const { v4: uuidv4 } = require('uuid');
-const votingPatterns = require('./votingPatterns');
+require('dotenv').config();
 
 const app = express();
 const server = http.createServer(app);
@@ -14,326 +13,310 @@ const io = new Server(server, {
   },
 });
 
-// 資料結構：存儲所有房間
 const rooms = {};
-// 資料結構：映射 socket ID 到使用者資訊
 const userSocketMap = {};
+const adminSockets = new Set();
+const roomBans = new Map();
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
+const BAN_DURATION_MS = 1 * 60 * 1000;
+
+// HELPERS
+const sanitizeName = (value, fallback = 'Guest') => {
+  if (typeof value !== 'string') return fallback;
+  const trimmed = value.trim();
+  return trimmed ? trimmed.slice(0, 20) : fallback;
+};
+
+const sanitizeRoomName = (value, fallback = 'New Room') => {
+  if (typeof value !== 'string') return fallback;
+  const trimmed = value.trim();
+  return trimmed ? trimmed.slice(0, 20) : fallback;
+};
+
+const getClientAddress = (socket) => {
+  // 優先檢查 x-forwarded-for (適用於 Proxy/Lightsail 環境)
+  const forwarded = socket?.handshake?.headers['x-forwarded-for'];
+  if (forwarded) {
+    return forwarded.split(',')[0].trim();
+  }
+  return socket?.handshake?.address || 'unknown';
+};
+
+/**
+ * 集中處理房間銷毀邏輯
+ * @param {string} roomId 房間 ID
+ * @param {string} reason 銷毀原因 (發送給客戶端)
+ */
+const destroyRoom = (roomId, reason = 'Room closed.') => {
+  const room = rooms[roomId];
+  if (!room) return;
+
+  console.log(`[Room] Destroying room ${roomId}. Reason: ${reason}`);
+  
+  // 通知房間內所有使用者
+  io.to(roomId).emit('roomExpired', { message: reason });
+  
+  // 執行 Socket 離開 (非必要但較乾淨)
+  const usersInRoom = Object.keys(room.users);
+  usersInRoom.forEach(userId => {
+    const s = io.sockets.sockets.get(userId);
+    if (s) s.leave(roomId);
+  });
+
+  // 清除資料
+  delete rooms[roomId];
+  roomBans.delete(roomId);
+};
+
+const getRoomBanMap = (roomId) => {
+  if (!roomBans.has(roomId)) {
+    roomBans.set(roomId, new Map());
+  }
+  return roomBans.get(roomId);
+};
+
+const cleanupRoomBans = (roomId) => {
+  const banMap = roomBans.get(roomId);
+  if (!banMap) return;
+  const now = Date.now();
+  for (const [key, entry] of banMap) {
+    if (entry.expiresAt <= now) banMap.delete(key);
+  }
+  if (banMap.size === 0) roomBans.delete(roomId);
+};
+
+const addRoomBan = (roomId, { name, address }) => {
+  if (!name && !address) return;
+  const banMap = getRoomBanMap(roomId);
+  const expiresAt = Date.now() + BAN_DURATION_MS;
+  if (address && address !== 'unknown') {
+    banMap.set(`addr:${address}`, { type: 'addr', address, expiresAt });
+  }
+  if (name) {
+    banMap.set(`name:${name}`, { type: 'name', name, expiresAt });
+  }
+};
+
+const isRoomBanned = (roomId, { name, address }) => {
+  const banMap = roomBans.get(roomId);
+  if (!banMap) return false;
+  cleanupRoomBans(roomId);
+  if (address && address !== 'unknown' && banMap.has(`addr:${address}`)) return true;
+  if (name && banMap.has(`name:${name}`)) return true;
+  return false;
+};
 
 io.on('connection', (socket) => {
   console.log(`[Connection] User connected: ${socket.id}`);
 
-  // 使用者註冊事件：當使用者連線後，他們首先發送他們的名字
-  // 使用者註冊事件：當使用者連線後，他們首先發送他們的名字
   socket.on('register', ({ name }) => {
-    // 🛡️ 保護機制：確保名字存在且為字串，防止 Admin Page 直接連線造成的崩潰
-    const safeName = (name && typeof name === 'string') ? name : 'Guest';
-    const sanitizedName = safeName.slice(0, 20);
-    
-    userSocketMap[socket.id] = { name: sanitizedName };
-    console.log(`[Register] User ${socket.id} registered as "${sanitizedName}" (original: "${name}")`);
+    const sn = sanitizeName(name);
+    userSocketMap[socket.id] = { name: sn };
+    console.log(`[Register] ${socket.id} -> ${sn}`);
   });
 
-  // 獲取房間列表事件：使用者請求查看所有可用的房間
-  socket.on('getRoomList', () => {
-    console.log(`[Room List] User ${socket.id} requested room list.`);
-    const roomList = Object.entries(rooms).map(([id, room]) => ({
-      id,
-      name: room.name,
-      ownerName: room.users[room.owner]?.name || 'N/A',
-      userCount: Object.keys(room.users).length,
-      maxUsers: room.maxUsers,
-    }));
-    socket.emit('roomListUpdated', roomList);
+  socket.on('checkRoom', ({ roomId }) => {
+    const room = rooms[roomId];
+    if (room) {
+      socket.emit('roomCheckResult', { exists: true, roomData: { id: room.id, name: room.name } });
+    } else {
+      socket.emit('roomCheckResult', { exists: false });
+    }
   });
 
-  // 建立房間事件：使用者想要建立一個新的 poker 房間
-  socket.on('createRoom', ({ roomName, maxUsers }) => {
-    // 🛡️ 保護機制：限制最大房間數量
+  socket.on('createRoom', ({ roomName, maxUsers, userName }) => {
+    if (userName && !userSocketMap[socket.id]) {
+      userSocketMap[socket.id] = { name: sanitizeName(userName) };
+    }
     const MAX_ROOMS = 30;
-    const currentRoomCount = Object.keys(rooms).length;
-    
-    if (currentRoomCount >= MAX_ROOMS) {
-      console.log(`[Error] Room limit reached (${MAX_ROOMS}). User ${socket.id} cannot create room.`);
-      socket.emit('roomError', { message: `Room limit reached (${MAX_ROOMS}). Please try again later or join an existing room.` });
-      return;
+    if (Object.keys(rooms).length >= MAX_ROOMS) {
+      return socket.emit('roomError', { message: 'Room limit reached.' });
     }
-
     const roomId = uuidv4();
-    const sanitizedRoomName = roomName.slice(0, 20);
+    const srn = sanitizeRoomName(roomName);
     const ownerId = socket.id;
-
-    // 檢查重複的房間名稱，如果需要則加上編號
-    let finalRoomName = sanitizedRoomName;
-    const existingRoomNames = Object.values(rooms).map(room => room.name);
-    
-    if (existingRoomNames.includes(finalRoomName)) {
-      let counter = 2;
-      // 持續遞增計數器直到找到唯一的名稱
-      while (existingRoomNames.includes(`${sanitizedRoomName} - ${counter}`)) {
-        counter++;
-      }
-      finalRoomName = `${sanitizedRoomName} - ${counter}`;
+    let finalName = srn;
+    const existing = Object.values(rooms).map(r => r.name);
+    if (existing.includes(finalName)) {
+      let c = 2;
+      while (existing.includes(`${srn} - ${c}`)) c++;
+      finalName = `${srn} - ${c}`;
     }
-
-    // 🛡️ 房間超時設定：1 小時
-    const ROOM_TIMEOUT_MS = 60 * 60 * 1000; // 1 hour in milliseconds
-    const createdAt = Date.now();
-    const expiresAt = createdAt + ROOM_TIMEOUT_MS;
-
+    const expiresAt = Date.now() + (60 * 60 * 1000);
     rooms[roomId] = {
       id: roomId,
-      name: finalRoomName,
+      name: finalName,
       owner: ownerId,
       maxUsers: maxUsers || 10,
       users: {},
       votesVisible: false,
       votingPattern: 'fibonacci',
-      createdAt: createdAt,
+      createdAt: Date.now(),
       expiresAt: expiresAt,
     };
-
-    // 設定房間自動過期刪除
-    setTimeout(() => {
-      if (rooms[roomId]) {
-        console.log(`[Timeout] Room "${finalRoomName}" (ID: ${roomId}) has expired and will be deleted.`);
-        // 通知所有在房間內的使用者
-        io.to(roomId).emit('roomExpired', { message: 'Room has expired after 1 hour.' });
-        // 刪除房間
-        delete rooms[roomId];
-        // 更新房間列表
-        io.emit('roomListUpdated', getRoomListPayload());
-      }
-    }, ROOM_TIMEOUT_MS);
-
-    console.log(`[Room] User ${socket.id} created room "${finalRoomName}" (ID: ${roomId}) [${currentRoomCount + 1}/${MAX_ROOMS}] - expires at ${new Date(expiresAt).toLocaleTimeString()}`);
-    const joined = joinRoom(roomId, socket);
-
-    if (!joined) {
-      console.log(`[Room] User ${socket.id} failed to join created room ${roomId}. Deleting room.`);
-      delete rooms[roomId];
-    }
-  });
-
-  // 加入房間事件：使用者想要加入一個現有的房間
-  socket.on('joinRoom', ({ roomId }) => {
     joinRoom(roomId, socket);
   });
 
-  // 離開房間事件：使用者想要離開他們目前的房間
+  socket.on('joinRoom', ({ roomId, userName }) => {
+    if (userName && !userSocketMap[socket.id]) {
+        userSocketMap[socket.id] = { name: sanitizeName(userName) };
+    }
+    joinRoom(roomId, socket);
+  });
+
   socket.on('leaveRoom', ({ roomId }) => {
     leaveRoom(roomId, socket);
   });
 
-  // 踢出使用者事件：房主想要將某人踢出房間
-  socket.on('kickUser', ({ roomId, targetSocketId }) => {
+  socket.on('kickUser', ({ roomId, targetSocketId }, callback) => {
     const room = rooms[roomId];
-    // 🛡️ 保護機制：只有房主可以踢人，且不能踢自己
     if (room && room.owner === socket.id && targetSocketId !== socket.id) {
       const targetSocket = io.sockets.sockets.get(targetSocketId);
+      const targetUser = room.users[targetSocketId];
+      if (targetUser) {
+          addRoomBan(roomId, { name: targetUser.name, address: targetSocket ? getClientAddress(targetSocket) : null });
+      }
       if (targetSocket) {
-        console.log(`[Kick] Owner ${socket.id} kicked user ${targetSocketId} from room ${roomId}`);
-        // 通知目標使用者被踢出了
-        targetSocket.emit('roomError', { message: 'You have been kicked from the room by the host.' });
         targetSocket.emit('kicked');
-        // 執行離開房間邏輯
         leaveRoom(roomId, targetSocket);
+        targetSocket.disconnect(true);
+        if (callback) callback({ success: true, message: 'Kicked.' });
+      } else if (targetUser) {
+        delete room.users[targetSocketId];
+        io.to(roomId).emit('roomStateUpdated', room);
+        if (callback) callback({ success: true, message: 'Zombie cleaned.' });
       }
     }
   });
 
-  // 投票事件：使用者提交他們的投票
   socket.on('vote', ({ roomId, vote }) => {
     const room = rooms[roomId];
     if (room && room.users[socket.id]) {
       room.users[socket.id].vote = vote;
-      console.log(`[Vote] User ${socket.id} in room ${roomId} voted: ${vote}`);
       io.to(roomId).emit('roomStateUpdated', room);
     }
   });
 
-  // 顯示投票事件：房主想要揭示所有投票
   socket.on('showVotes', ({ roomId }) => {
     const room = rooms[roomId];
     if (room && room.owner === socket.id) {
       room.votesVisible = true;
-      console.log(`[Vote] Owner ${socket.id} revealed votes in room ${roomId}`);
       io.to(roomId).emit('roomStateUpdated', room);
     }
   });
 
-  // 重置投票事件：房主想要開始新的投票回合
   socket.on('resetVotes', ({ roomId }) => {
     const room = rooms[roomId];
     if (room && room.owner === socket.id) {
       room.votesVisible = false;
-      for (const userId in room.users) {
-        room.users[userId].vote = null;
-      }
-      console.log(`[Vote] Owner ${socket.id} reset votes in room ${roomId}`);
+      for (const id in room.users) room.users[id].vote = null;
       io.to(roomId).emit('roomStateUpdated', room);
     }
   });
 
-
-  // --- 管理員專用事件 ---
-
-  // 取得管理員資料：回傳所有房間和使用者的完整列表
-  socket.on('adminGetData', () => {
-    // 簡單回傳整個 rooms 物件即可，前端再處理顯示
-    socket.emit('adminDataUpdated', rooms);
+  socket.on('adminAuth', ({ password }) => {
+    // 🛡️ 安全加固：確保伺服器端有設定密碼且密碼不為空
+    if (ADMIN_PASSWORD && password && password === ADMIN_PASSWORD) {
+      adminSockets.add(socket.id);
+      socket.emit('adminAuthResult', { success: true });
+    } else {
+      socket.emit('adminAuthResult', { success: false });
+    }
   });
 
-  // 管理員刪除房間
+  socket.on('adminGetData', () => {
+    if (adminSockets.has(socket.id)) socket.emit('adminDataUpdated', rooms);
+  });
+
   socket.on('adminDeleteRoom', ({ roomId }) => {
-    if (rooms[roomId]) {
-      console.log(`[Admin] Deleting room ${roomId}`);
-      io.to(roomId).emit('roomError', { message: 'This room has been closed by RJ.' });
-      io.to(roomId).emit('roomExpired', { message: 'Admin closed the room.' }); // 確保前端清除狀態
-      delete rooms[roomId];
-      io.emit('roomListUpdated', getRoomListPayload());
-      // 更新管理員介面
+    if (adminSockets.has(socket.id)) {
+      destroyRoom(roomId, 'God closed room.');
       io.emit('adminDataUpdated', rooms);
     }
   });
 
-  // 管理員踢除使用者
-  socket.on('adminDeleteUser', ({ roomId, userId }) => {
+  socket.on('adminDeleteUser', ({ roomId, userId }, callback) => {
+    if (!adminSockets.has(socket.id)) return;
     const room = rooms[roomId];
     if (room && room.users[userId]) {
-      const targetSocket = io.sockets.sockets.get(userId);
-      console.log(`[Admin] Kicking user ${userId} from room ${roomId}`);
-      
-      if (targetSocket) {
-        targetSocket.emit('roomError', { message: 'You have been removed by RJ.' });
-        targetSocket.emit('kicked');
-        leaveRoom(roomId, targetSocket);
+      const ts = io.sockets.sockets.get(userId);
+      addRoomBan(roomId, { name: room.users[userId].name, address: ts ? getClientAddress(ts) : null });
+      if (ts) {
+        ts.emit('kicked');
+        leaveRoom(roomId, ts);
+        ts.disconnect(true);
       } else {
-        // 如果 socket 已經斷線但在房間資料中還在（邊緣情況），手動清理
         delete room.users[userId];
         if (Object.keys(room.users).length === 0) {
-          delete rooms[roomId];
+            destroyRoom(roomId, 'Room empty.');
         } else if (room.owner === userId) {
-             // 轉移房主邏輯簡化版：直接給下一個人
-             room.owner = Object.keys(room.users)[0];
+            room.owner = Object.keys(room.users)[0];
         }
-         io.to(roomId).emit('roomStateUpdated', room);
+        io.to(roomId).emit('roomStateUpdated', room);
       }
-      // 更新管理員介面
       io.emit('adminDataUpdated', rooms);
+      if (callback) callback({ success: true });
     }
   });
 
-  // 核彈按鈕：刪除所有房間
   socket.on('adminNuke', () => {
-    console.log(`[Admin] NUKING ALL ROOMS`);
-    Object.keys(rooms).forEach(roomId => {
-        io.to(roomId).emit('roomError', { message: 'Server reset by administrator.' });
-        io.to(roomId).emit('roomExpired', { message: 'Server reset.' });
-    });
-    // 清空物件
-    for (const key in rooms) delete rooms[key];
-    
-    io.emit('roomListUpdated', getRoomListPayload());
+    if (!adminSockets.has(socket.id)) return;
+    Object.keys(rooms).forEach(id => destroyRoom(id, 'Server reset.'));
+    // 清除所有封鎖 (可選)
+    roomBans.clear();
     io.emit('adminDataUpdated', rooms);
   });
 
-  // 斷線事件：使用者的連線中斷
   socket.on('disconnect', () => {
-    console.log(`[Connection] User disconnected: ${socket.id}`);
-    // 檢查使用者是否在任何房間中，如果是則將他們移除
-    for (const roomId in rooms) {
-      if (rooms[roomId].users[socket.id]) {
-        leaveRoom(roomId, socket);
+    for (const rid in rooms) {
+      if (rooms[rid].users[socket.id]) {
+        leaveRoom(rid, socket);
       }
     }
     delete userSocketMap[socket.id];
+    adminSockets.delete(socket.id);
   });
 });
 
-/**
- * joinRoom 函數：處理使用者加入房間的邏輯
- * @param {string} roomId - 要加入的房間 ID
- * @param {object} socket - Socket.IO socket 物件
- * @returns {boolean} - 如果成功加入則返回 true，否則返回 false
- */
 function joinRoom(roomId, socket) {
   const room = rooms[roomId];
   const user = userSocketMap[socket.id];
-
   if (room && user && Object.keys(room.users).length < room.maxUsers) {
+    if (isRoomBanned(roomId, { name: user.name, address: getClientAddress(socket) })) {
+      socket.emit('roomError', { message: 'Access denied.' });
+      return false;
+    }
     socket.join(roomId);
     room.users[socket.id] = { ...user, id: socket.id, vote: null };
-    console.log(`[Room] User ${socket.id} ("${user.name}") joined room ID: ${roomId}`);
-
-    const roomList = getRoomListPayload();
-    io.emit('roomListUpdated', roomList);
     io.to(roomId).emit('roomStateUpdated', room);
     return true;
-  } else {
-    // 處理錯誤：房間已滿或使用者未註冊
-    const errorReason = !room ? 'Room not found' : !user ? 'User not registered in userSocketMap' : 'Room full';
-    console.log(`[Error] User ${socket.id} failed to join room ${roomId}. Reason: ${errorReason}. userSocketMap has name: ${!!user}`);
-    return false;
   }
+  socket.emit('roomError', { message: 'Join failed.' });
+  return false;
 }
 
-/**
- * leaveRoom 函數：處理使用者離開房間的邏輯
- * @param {string} roomId - 要離開的房間 ID
- * @param {object} socket - Socket.IO socket 物件
- */
 function leaveRoom(roomId, socket) {
   const room = rooms[roomId];
   if (room) {
     socket.leave(roomId);
-    const userName = room.users[socket.id]?.name;
     delete room.users[socket.id];
-    console.log(`[Room] User ${socket.id} ("${userName}") left room ID: ${roomId}`);
-
-    // 如果房間空了，刪除它
     if (Object.keys(room.users).length === 0) {
-      delete rooms[roomId];
-      console.log(`[Room] Room ${roomId} is empty and has been deleted.`);
+      destroyRoom(roomId, 'Room empty.');
+    } else if (room.owner === socket.id) {
+      room.owner = Object.keys(room.users)[0];
+      io.to(roomId).emit('roomStateUpdated', room);
     } else {
-      // 如果房主離開了，將房主轉移給第一個使用者
-      if (room.owner === socket.id) {
-        room.owner = Object.keys(room.users)[0];
-        console.log(`[Room] Owner left. New owner of room ${roomId} is ${room.owner}`);
-      }
       io.to(roomId).emit('roomStateUpdated', room);
     }
-    
-    const roomList = getRoomListPayload();
-    io.emit('roomListUpdated', roomList);
   }
 }
 
-/**
- * getRoomListPayload 函數：生成房間列表的有效載荷
- * @returns {Array} - 房間列表陣列
- */
-function getRoomListPayload() {
-    return Object.entries(rooms).map(([id, room]) => ({
-        id,
-        name: room.name,
-        ownerName: room.users[room.owner]?.name || 'N/A',
-        userCount: Object.keys(room.users).length,
-        maxUsers: room.maxUsers,
-    }));
-}
-
-// 垃圾回收：每 60 秒清理空房間
 setInterval(() => {
-  let cleaned = false;
-  for (const roomId in rooms) {
-    if (Object.keys(rooms[roomId].users).length === 0) {
-      console.log(`[GC] Deleting empty room ${roomId}`);
-      delete rooms[roomId];
-      cleaned = true;
+  const now = Date.now();
+  for (const rid in rooms) {
+    if (rooms[rid].expiresAt && now > rooms[rid].expiresAt) {
+      destroyRoom(rid, 'Room expired.');
     }
-  }
-  if (cleaned) {
-    io.emit('roomListUpdated', getRoomListPayload());
   }
 }, 60000);
 
