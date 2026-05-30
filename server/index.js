@@ -19,6 +19,7 @@ const adminSockets = new Set();
 const roomBans = new Map();
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
 const BAN_DURATION_MS = 1 * 60 * 1000;
+const ROOM_DURATION_MS = 2 * 60 * 60 * 1000;
 
 // HELPERS
 const sanitizeName = (value, fallback = 'Guest') => {
@@ -142,7 +143,7 @@ io.on('connection', (socket) => {
       while (existing.includes(`${srn} - ${c}`)) c++;
       finalName = `${srn} - ${c}`;
     }
-    const expiresAt = Date.now() + (60 * 60 * 1000);
+    const expiresAt = Date.now() + ROOM_DURATION_MS;
     rooms[roomId] = {
       id: roomId,
       name: finalName,
