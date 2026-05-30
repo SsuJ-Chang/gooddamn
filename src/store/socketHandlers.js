@@ -34,8 +34,11 @@ export const initSocketHandlers = (storeActions) => {
     set({ adminData });
   });
 
-  socket.on('adminAuthResult', ({ success }) => {
-    set({ adminIsAuthenticated: success });
+  socket.on('adminAuthResult', ({ success, message }) => {
+    set({
+      adminIsAuthenticated: success,
+      adminAuthError: success ? null : (message || 'Invalid Password'),
+    });
     if (success) socket.emit('adminGetData');
   });
 

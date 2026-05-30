@@ -14,6 +14,7 @@ export const useStore = create((set, get) => ({
   roomCheckData: null,
   adminData: null,
   adminIsAuthenticated: false,
+  adminAuthError: null,
 
   // ACTIONS
   connect: () => {
@@ -94,7 +95,8 @@ export const useStore = create((set, get) => ({
 
   // --- 管理員 Actions ---
   adminAuth: (password) => {
-     socket.emit('adminAuth', { password });
+    set({ adminAuthError: null });
+    socket.emit('adminAuth', { password });
   },
 
   fetchAdminData: () => {

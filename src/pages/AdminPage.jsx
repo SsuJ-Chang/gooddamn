@@ -13,6 +13,7 @@ export function AdminPage() {
   const nukeRooms = useStore((state) => state.adminNuke);
 
   const isAuthenticated = useStore((state) => state.adminIsAuthenticated);
+  const authError = useStore((state) => state.adminAuthError);
   const authenticate = useStore((state) => state.adminAuth);
 
   const connect = useStore((state) => state.connect);
@@ -20,7 +21,6 @@ export function AdminPage() {
 
   // 2. Local State Hooks (Must be Top Level)
   const [password, setPassword] = useState('');
-  const [errorMsg, setErrorMsg] = useState('');
 
   // 這些原本被放在 conditional return 之後，導致了 Crash
   const [selectedRooms, setSelectedRooms] = useState(new Set());
@@ -31,11 +31,6 @@ export function AdminPage() {
   const handleLogin = (e) => {
     e.preventDefault();
     authenticate(password);
-    setTimeout(() => {
-      if (!useStore.getState().adminIsAuthenticated) {
-        setErrorMsg('Invalid Password');
-      }
-    }, 1000);
   };
 
   useEffect(() => {
@@ -113,7 +108,7 @@ export function AdminPage() {
               className="w-full bg-bg-tertiary border border-white/10 rounded px-4 py-2 focus:outline-none focus:border-primary transition-colors text-center font-mono text-lg text-white"
               autoFocus
             />
-            {errorMsg && <p className="text-red-400 text-sm text-center">{errorMsg}</p>}
+            {authError && <p className="text-red-400 text-sm text-center">{authError}</p>}
             <button
               type="submit"
               className="w-full bg-primary hover:bg-primary-light text-white font-bold py-2 px-4 rounded transition-all active:scale-95"

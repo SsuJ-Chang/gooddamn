@@ -17,9 +17,18 @@ const rooms = {};
 const userSocketMap = {};
 const adminSockets = new Set();
 const roomBans = new Map();
+const adminAuthFailures = new Map();
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
 const BAN_DURATION_MS = 1 * 60 * 1000;
 const ROOM_DURATION_MS = 2 * 60 * 60 * 1000;
+
+const parsePositiveInt = (value, fallback) => {
+  const parsed = Number.parseInt(value, 10);
+  return Number.isInteger(parsed) && parsed > 0 ? parsed : fallback;
+};
+
+const ADMIN_AUTH_MAX_ATTEMPTS = parsePositiveInt(process.env.ADMIN_AUTH_MAX_ATTEMPTS, 5);
+const ADMIN_AUTH_COOLDOWN_MS = parsePositiveInt(process.env.ADMIN_AUTH_COOLDOWN_MS, 300000);
 
 // HELPERS
 const sanitizeName = (value, fallback = 'Guest') => {
@@ -105,6 +114,27 @@ const isRoomBanned = (roomId, { name, address }) => {
   if (address && address !== 'unknown' && banMap.has(`addr:${address}`)) return true;
   if (name && banMap.has(`name:${name}`)) return true;
   return false;
+};
+
+const getAdminAuthFailure = (address) => {
+  const now = Date.now();
+  const entry = adminAuthFailures.get(address);
+  if (!entry) return { attempts: 0, lockedUntil: 0 };
+  if (entry.lockedUntil && entry.lockedUntil <= now) {
+    adminAuthFailures.delete(address);
+    return { attempts: 0, lockedUntil: 0 };
+  }
+  return entry;
+};
+
+const recordAdminAuthFailure = (address) => {
+  const now = Date.now();
+  const current = getAdminAuthFailure(address);
+  const attempts = current.attempts + 1;
+  const lockedUntil = attempts >= ADMIN_AUTH_MAX_ATTEMPTS ? now + ADMIN_AUTH_COOLDOWN_MS : 0;
+  const next = { attempts, lockedUntil };
+  adminAuthFailures.set(address, next);
+  return next;
 };
 
 io.on('connection', (socket) => {
@@ -216,12 +246,31 @@ io.on('connection', (socket) => {
   });
 
   socket.on('adminAuth', ({ password }) => {
-    // 🛡️ 安全加固：確保伺服器端有設定密碼且密碼不為空
+    const address = getClientAddress(socket);
+    const failure = getAdminAuthFailure(address);
+    if (failure.lockedUntil && failure.lockedUntil > Date.now()) {
+      const retryAfterMs = failure.lockedUntil - Date.now();
+      socket.emit('adminAuthResult', {
+        success: false,
+        message: 'Too many failed attempts. Please try again later.',
+        retryAfterMs,
+      });
+      return;
+    }
+
     if (ADMIN_PASSWORD && password && password === ADMIN_PASSWORD) {
+      adminAuthFailures.delete(address);
       adminSockets.add(socket.id);
       socket.emit('adminAuthResult', { success: true });
     } else {
-      socket.emit('adminAuthResult', { success: false });
+      const nextFailure = recordAdminAuthFailure(address);
+      socket.emit('adminAuthResult', {
+        success: false,
+        message: nextFailure.lockedUntil
+          ? 'Too many failed attempts. Please try again later.'
+          : 'Invalid Password',
+        retryAfterMs: nextFailure.lockedUntil ? nextFailure.lockedUntil - Date.now() : 0,
+      });
     }
   });
 
