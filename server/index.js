@@ -59,6 +59,7 @@ const parsePositiveInt = (value, fallback) => {
   return Number.isInteger(parsed) && parsed > 0 ? parsed : fallback;
 };
 
+const PORT = parsePositiveInt(process.env.PORT, 3001);
 const ADMIN_AUTH_MAX_ATTEMPTS = parsePositiveInt(process.env.ADMIN_AUTH_MAX_ATTEMPTS, 5);
 const ADMIN_AUTH_COOLDOWN_MS = parsePositiveInt(process.env.ADMIN_AUTH_COOLDOWN_MS, 300000);
 
@@ -409,6 +410,6 @@ setInterval(() => {
   }
 }, 60000);
 
-server.listen(3001, () => {
-  console.log('SERVER RUNNING ON PORT 3001');
+server.listen(PORT, () => {
+  console.log(`SERVER RUNNING ON PORT ${PORT}`);
 });
