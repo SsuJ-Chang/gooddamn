@@ -28,7 +28,7 @@ export function UserCard({ user, isCurrentUser, isHost = false, votesVisible, is
     // `bg-primary` 從我們的主題設定背景顏色
     // `overflow-hidden` 是一個好習慣，確保沒有東西溢出圓角
     <div className={`relative h-32 sm:h-40 rounded-lg text-white shadow-lg overflow-hidden border-2 ${isHighlighted
-      ? 'bg-gradient-to-br from-yellow-400 to-amber-500 border-yellow-300 ring-4 ring-yellow-400 animate-[gentle-shake_0.5s_ease-in-out_infinite]'
+      ? 'bg-gradient-to-br from-yellow-400 to-amber-500 border-yellow-300 ring-4 ring-yellow-400 animate-[reveal-pop_0.62s_cubic-bezier(0.22,1,0.36,1)_1,consensus-glow_1.8s_ease-in-out_infinite_0.62s]'
       : 'bg-primary border-primary-light'
       }`}>
 
@@ -73,7 +73,12 @@ export function UserCard({ user, isCurrentUser, isHost = false, votesVisible, is
         ) : (
           // --- 在投票顯示之後要展示的內容 ---
           // 顯示使用者的投票值 - 響應式字體大小
-          <span className="text-5xl sm:text-7xl font-bold" style={{ textShadow: '4px 4px 4px rgba(0,0,0,0.5)' }}>{user.vote || '-'}</span>
+          <span
+            className={`text-5xl sm:text-7xl font-bold ${isHighlighted ? 'animate-[vote-value-pop_0.62s_cubic-bezier(0.22,1,0.36,1)_1]' : ''}`}
+            style={{ textShadow: '4px 4px 4px rgba(0,0,0,0.5)' }}
+          >
+            {user.vote || '-'}
+          </span>
         )}
       </div>
 
