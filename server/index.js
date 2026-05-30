@@ -6,10 +6,41 @@ require('dotenv').config();
 
 const app = express();
 const server = http.createServer(app);
+
+const parseAllowedOrigins = (value) => {
+  if (!value) return [];
+  return value
+    .split(',')
+    .map(origin => origin.trim())
+    .filter(Boolean)
+    .map(origin => {
+      try {
+        return new URL(origin).origin;
+      } catch {
+        return origin;
+      }
+    });
+};
+
+const ALLOWED_ORIGINS = parseAllowedOrigins(process.env.CLIENT_ORIGIN);
+const isAllowedOrigin = (origin) => {
+  if (!origin || ALLOWED_ORIGINS.length === 0) return true;
+  return ALLOWED_ORIGINS.includes(origin);
+};
+
 const io = new Server(server, {
   cors: {
-    origin: '*',
+    origin: (origin, callback) => {
+      if (isAllowedOrigin(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error('Origin not allowed'));
+      }
+    },
     methods: ['GET', 'POST'],
+  },
+  allowRequest: (req, callback) => {
+    callback(null, isAllowedOrigin(req.headers.origin));
   },
 });
 
