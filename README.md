@@ -7,7 +7,7 @@
 一個即時、簡潔且美觀能讓團隊輕鬆進行敏捷估點的工具。
 
 ![Planning Poker](https://img.shields.io/badge/Planning-Poker-orange)
-![React](https://img.shields.io/badge/React-18-blue)
+![React](https://img.shields.io/badge/React-19-blue)
 ![Socket.IO](https://img.shields.io/badge/Socket.IO-4-green)
 
 ## ✨ 功能特色
@@ -34,7 +34,7 @@
 ## 🛠️ 技術棧
 
 ### 前端
-- **React 18** + **React Router** - 現代化導航與 UI 框架
+- **React 19** + **React Router** - 現代化導航與 UI 框架
 - **Zustand** - 高效狀態管理
 - **Tailwind CSS 4.0** - 預設深色系優化樣式方案
 - **Socket.IO Client** - 極速即時通訊

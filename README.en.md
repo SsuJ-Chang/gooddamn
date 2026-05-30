@@ -7,7 +7,7 @@
 A real-time, clean, and beautiful tool for easy agile estimation.
 
 ![Planning Poker](https://img.shields.io/badge/Planning-Poker-orange)
-![React](https://img.shields.io/badge/React-18-blue)
+![React](https://img.shields.io/badge/React-19-blue)
 ![Socket.IO](https://img.shields.io/badge/Socket.IO-4-green)
 
 ## ✨ Features
@@ -34,7 +34,7 @@ A real-time, clean, and beautiful tool for easy agile estimation.
 ## 🛠️ Tech Stack
 
 ### Frontend
-- **React 18** + **React Router** - Modern navigation and UI framework
+- **React 19** + **React Router** - Modern navigation and UI framework
 - **Zustand** - High-performance state management
 - **Tailwind CSS 4.0** - Optimized dark-theme styles
 - **Socket.IO Client** - Real-time communication

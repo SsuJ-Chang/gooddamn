@@ -1,4 +1,3 @@
-import React, { memo } from 'react';
 import { FiCheck, FiHelpCircle, FiLogOut } from 'react-icons/fi';
 import { FaCrown } from 'react-icons/fa';
 
@@ -99,4 +98,3 @@ export function UserCard({ user, isCurrentUser, isHost = false, votesVisible, is
     </div>
   );
 }
-

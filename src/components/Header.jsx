@@ -37,7 +37,7 @@ export function Header({
       <div className="flex flex-col gap-1">
         <Link
           to="/"
-          onClick={(e) => {
+          onClick={() => {
             // 如果有提供 onLeave (例如在 RoomPage)，執行它
             if (onLeave) onLeave();
           }}
@@ -99,4 +99,3 @@ export function Header({
     </header>
   );
 }
-

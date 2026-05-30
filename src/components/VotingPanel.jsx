@@ -1,6 +1,3 @@
-import React, { memo } from 'react';
-import { FaCheck } from 'react-icons/fa';
-
 /**
  * Planning Poker 使用的標準 Fibonacci 數列
  */
@@ -55,5 +52,3 @@ export function VotingPanel({ currentUserVote, onVote, disabled }) {
     </div>
   );
 }
-
-

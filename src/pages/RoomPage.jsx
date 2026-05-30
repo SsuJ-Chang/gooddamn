@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useStore } from '../store/useStore';
 import { Header } from '../components/Header';
@@ -9,7 +9,6 @@ import { VoteResults } from '../components/VoteResults';
 import { QRCodeModal } from '../components/QRCodeModal';
 import { Toast } from '../components/Toast';
 import { Loading } from '../components/Loading';
-import confetti from 'canvas-confetti';
 
 
 /**

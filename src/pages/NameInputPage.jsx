@@ -142,7 +142,7 @@ export function NameInputPage() {
       <div className="rounded-lg bg-bg-secondary p-6 sm:p-8 shadow-2xl w-full max-w-sm border border-bg-tertiary">
         {/* 標題：根據模式顯示不同內容 */}
         <Link to="/" className="mb-6 block text-center text-2xl sm:text-3xl font-bold text-text-primary hover:text-primary transition-colors">
-          Welcome to Gooddamn
+          {isJoinMode && roomName ? `Join ${roomName}` : 'Welcome to Gooddamn'}
         </Link>
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
