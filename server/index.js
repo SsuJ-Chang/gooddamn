@@ -252,7 +252,9 @@ io.on('connection', (socket) => {
       const retryAfterMs = failure.lockedUntil - Date.now();
       socket.emit('adminAuthResult', {
         success: false,
-        message: 'Too many failed attempts. Please try again later.',
+        locked: true,
+        attempts: failure.attempts,
+        maxAttempts: ADMIN_AUTH_MAX_ATTEMPTS,
         retryAfterMs,
       });
       return;
@@ -266,9 +268,9 @@ io.on('connection', (socket) => {
       const nextFailure = recordAdminAuthFailure(address);
       socket.emit('adminAuthResult', {
         success: false,
-        message: nextFailure.lockedUntil
-          ? 'Too many failed attempts. Please try again later.'
-          : 'Invalid Password',
+        locked: Boolean(nextFailure.lockedUntil),
+        attempts: nextFailure.attempts,
+        maxAttempts: ADMIN_AUTH_MAX_ATTEMPTS,
         retryAfterMs: nextFailure.lockedUntil ? nextFailure.lockedUntil - Date.now() : 0,
       });
     }

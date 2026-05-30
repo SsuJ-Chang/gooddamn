@@ -34,10 +34,16 @@ export const initSocketHandlers = (storeActions) => {
     set({ adminData });
   });
 
-  socket.on('adminAuthResult', ({ success, message }) => {
+  socket.on('adminAuthResult', ({ success, locked, attempts, maxAttempts, message }) => {
+    const authError = locked
+      ? '密碼輸入錯誤已達上限，請稍後再試'
+      : `密碼已輸入錯誤 ${attempts || 0} 次`;
+
     set({
       adminIsAuthenticated: success,
-      adminAuthError: success ? null : (message || 'Invalid Password'),
+      adminAuthError: success ? null : (message || authError),
+      adminAuthAttempts: success ? 0 : (attempts || 0),
+      adminAuthMaxAttempts: maxAttempts || null,
     });
     if (success) socket.emit('adminGetData');
   });

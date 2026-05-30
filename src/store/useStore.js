@@ -15,6 +15,8 @@ export const useStore = create((set, get) => ({
   adminData: null,
   adminIsAuthenticated: false,
   adminAuthError: null,
+  adminAuthAttempts: 0,
+  adminAuthMaxAttempts: null,
 
   // ACTIONS
   connect: () => {
