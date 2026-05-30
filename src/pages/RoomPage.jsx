@@ -58,6 +58,7 @@ export function RoomPage() {
   const users = Object.values(room.users);
   const currentUser = users.find((u) => u.id === clientId);
   const isOwner = room.owner === clientId;
+  const voteValues = room.votingValues || [];
 
   // 計算已投票的人數（用於手機版 Header 顯示）
   const votedCount = users.filter((u) => u.vote !== null).length;
@@ -159,6 +160,7 @@ export function RoomPage() {
             {/* VotingPanel 投票面板 */}
             <VotingPanel
               currentUserVote={currentUser?.vote}
+              voteValues={voteValues}
               onVote={vote}
               disabled={room.votesVisible}
             />

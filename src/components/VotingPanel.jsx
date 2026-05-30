@@ -1,23 +1,19 @@
 /**
- * Planning Poker 使用的標準 Fibonacci 數列
- */
-const VOTE_VALUES = ['1', '2', '3', '5', '8', '13', '20', '?'];
-
-/**
  * 投票面板元件
  *
  * 顯示投票按鈕列表（例如 '1', '2', '3', '5', ...）
  *
  * @param {object} props - 傳遞給元件的屬性
  * @param {string|null} props.currentUserVote - 使用者當前的投票，用於凸顯選中的按鈕
+ * @param {string[]} props.voteValues - 伺服器提供的投票選項
  * @param {function} props.onVote - 當按下投票按鈕時要呼叫的函數
  * @param {boolean} props.disabled - 投票按鈕是否應該被停用（例如，在投票揭示後）
  */
-export function VotingPanel({ currentUserVote, onVote, disabled }) {
+export function VotingPanel({ currentUserVote, voteValues, onVote, disabled }) {
   return (
     // 響應式投票面板：手機版減少按鈕大小和間距，增加觸控反饋
     <div className="flex flex-wrap justify-center gap-3 sm:gap-4">
-      {VOTE_VALUES.map((value) => {
+      {voteValues.map((value) => {
         // 確定此按鈕是否是使用者當前選擇的按鈕
         const isSelected = currentUserVote === value;
 

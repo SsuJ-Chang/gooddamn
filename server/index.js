@@ -52,6 +52,7 @@ const adminAuthFailures = new Map();
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
 const BAN_DURATION_MS = 1 * 60 * 1000;
 const ROOM_DURATION_MS = 2 * 60 * 60 * 1000;
+const VOTING_VALUES = Object.freeze(['1', '2', '3', '5', '8', '13', '20', '?']);
 
 const parsePositiveInt = (value, fallback) => {
   const parsed = Number.parseInt(value, 10);
@@ -213,6 +214,7 @@ io.on('connection', (socket) => {
       users: {},
       votesVisible: false,
       votingPattern: 'fibonacci',
+      votingValues: VOTING_VALUES,
       createdAt: Date.now(),
       expiresAt: expiresAt,
     };
@@ -254,6 +256,10 @@ io.on('connection', (socket) => {
   socket.on('vote', ({ roomId, vote }) => {
     const room = rooms[roomId];
     if (room && room.users[socket.id]) {
+      if (vote !== null && !VOTING_VALUES.includes(vote)) {
+        socket.emit('roomError', { message: 'Invalid vote.' });
+        return;
+      }
       room.users[socket.id].vote = vote;
       io.to(roomId).emit('roomStateUpdated', room);
     }
