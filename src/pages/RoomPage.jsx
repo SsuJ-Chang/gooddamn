@@ -34,18 +34,6 @@ export function RoomPage() {
   const [isQRModalOpen, setIsQRModalOpen] = useState(false);
   const [showCopyToast, setShowCopyToast] = useState(false);
 
-
-
-  // 監聽投票揭示狀態，觸發 Confetti
-  // (暫時移除以排除 Crash 原因)
-  /*
-  useEffect(() => {
-    if (room?.votesVisible) {
-      // Logic...
-    }
-  }, [room?.votesVisible, room?.users]); 
-  */
-
   // 生成房間 URL
   const roomUrl = typeof window !== 'undefined' ? `${window.location.origin}/room/${room?.id}` : '';
 

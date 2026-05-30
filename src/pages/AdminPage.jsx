@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useStore } from '../store/useStore';
 import { Link } from 'react-router-dom';
 import { NavHeader } from '../components/NavHeader';
-import { FiTrash2, FiRefreshCw, FiAlertTriangle, FiZap, FiHome, FiUsers } from 'react-icons/fi';
+import { FiTrash2, FiRefreshCw, FiHome, FiUsers } from 'react-icons/fi';
 
 export function AdminPage() {
   // 1. Store Hooks (Top Level)
@@ -22,7 +22,6 @@ export function AdminPage() {
   // 2. Local State Hooks (Must be Top Level)
   const [password, setPassword] = useState('');
 
-  // 這些原本被放在 conditional return 之後，導致了 Crash
   const [selectedRooms, setSelectedRooms] = useState(new Set());
   const [selectedUsers, setSelectedUsers] = useState(new Set());
 

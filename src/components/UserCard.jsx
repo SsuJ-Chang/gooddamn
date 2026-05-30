@@ -16,7 +16,6 @@ import { FaCrown } from 'react-icons/fa';
  * @param {boolean} props.isViewerHost - 如果目前觀看者是房主，則為 true
  * @param {function} props.onKick - 點擊「踢出」按鈕時要呼叫的函數
  */
-// 🚀 效能優化暫時移除 (Revert for stability)
 export function UserCard({ user, isCurrentUser, isHost = false, votesVisible, isHighlighted = false, isViewerHost = false, onKick }) {
   // 衍生布林值，用於輕鬆檢查使用者是否已提交投票
   const hasVoted = user.vote !== null;
